@@ -1,0 +1,281 @@
+; Hydrogen Operating System
+; Copyright (C) 2011 Lukas Heidemann
+;
+; This program is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; This program is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+section .text
+bits 64
+
+;-------------------------------------------------------------------------------
+; ACPI - Basic Table Parsing (RSDP/RSDT/XSDT)
+;-------------------------------------------------------------------------------
+
+; Parses the ACPI tables.
+;
+; Searches for the RSDP and passes control to acpi_rsdp_parse.
+acpi_parse:
+	; Store
+	push rax
+	push rbx
+	push rsi
+
+	; Find RSDP
+	mov rsi, 0xE0000			; Start looking here
+	mov rbx, 'RSD PTR '			; Look for this
+	
+.rsdp_next:
+	lodsq						; Load potential signature
+	
+	cmp rax, rbx				; Compare and check if we found it
+	je .rsdp_found				; Found (ignore checksum for now)
+	
+	add rsi, 8					; Else, advance additional 8 bytes, as
+								; the signature must be 16 byte aligned
+	
+	cmp rsi, 0x100000			; Search until we reached this (1MB)
+	jl .rsdp_next				; We can search further
+	
+	jmp .rsdp_not_found			; Else, we do not have ACPI
+	
+.rsdp_found:
+	; Parse RSDP
+	sub rsi, 8					; Subtract 8 bytes to get the beginning
+								; of the RSDP
+	call acpi_rsdp_parse		; Parse the contents of the RSDP
+	
+	; Restore
+	pop rsi
+	pop rbx
+	pop rax
+	ret
+	
+.rsdp_not_found:
+	; TODO: Panic
+	jmp $
+	
+; Parses the RSDP and passes control to either acpi_rsdt_parse or
+; acpi_xsdt_parse, depending on the discovered ACPI version.
+;
+; Parameters:
+;	rsi Address of the RSDP.
+acpi_rsdp_parse:
+	; Store
+	push rax
+	push rsi
+
+	; Check version
+	xor rax, rax				; Clear rax and load version
+	mov al, byte [rsi + acpi_rsdp.revision]
+	
+	cmp rax, 0					; Compare version to 1.0
+	je .found_1					; Found 1.0
+	
+	jmp .found_2				; Found 2.0 or later
+	
+.found_1:
+	xor rax, rax
+	mov eax, dword [rsi + acpi_rsdp.rsdt_addr]	; Get rsdt address (to rax)
+	xchg rax, rsi								; Write rsdt address to rsi
+	call acpi_rsdt_parse						; Parse rsdt
+	
+	jmp .end					; Jump to end of function
+	
+.found_2:
+	mov rsi, qword [rsi + acpi_rsdp.xsdt_addr]	; Get xsdt address
+	call acpi_xsdt_parse						; Parse xsdt
+	
+	; Fall through to end of function
+.end:
+	; Restore
+	pop rsi
+	pop rax
+	ret
+	
+; Macro for both, acpi_rsdp_parse and acpi_xsdt_parse, which are almost
+; the same, except for the size of the pointers.
+;
+; Macro Parameters:
+; 	%1 Size of the pointer.
+;   %2 Instruction (lodsd or lodsq) for loading the pointer.
+%macro acpi_nsdt_parse 2
+	; Store
+	push rax
+	push rcx
+	push rsi
+
+	xor rcx, rcx
+	mov ecx, dword [rsi + acpi_sdt_header.length] ; Get length
+	
+	add rsi, 36					; Advance 26 bytes behind header
+	sub rcx, 36					; Subtract header size from length
+	
+	; Parse header pointers
+	xor rax, rax				; Clear rax for loading the addresses
+	
+.next_ptr:
+	%2							; Load the table pointer
+	
+	xchg rax, rsi				; Swap rax and rsi to pass the table
+								; pointer in rsi
+	call acpi_table_parse		; Generic function for parsing an ACPI
+								; table
+	xchg rax, rsi				; Sawp rax and rsi again to restore
+								; original situation
+								
+	sub rcx, %1					; Subtract pointer size from remaining
+	cmp rcx, 0					; Pointer left?
+	jne .next_ptr				; Parse pointer.
+	
+	; Restore
+	pop rsi
+	pop rcx
+	pop rax
+	ret
+%endmacro
+
+acpi_rsdt_parse: acpi_nsdt_parse 4, lodsd
+acpi_xsdt_parse: acpi_nsdt_parse 8, lodsq
+
+; Parses an ACPI table by passing control to the respective table
+; handler.
+;
+; Parameters:
+;	rsi Address of the table to parse.
+acpi_table_parse:
+	; Store
+	push rax
+
+	; Load signature
+	xor rax, rax
+	mov eax, dword [rsi + acpi_sdt_header.signature]
+	
+	; Check for MADT
+	cmp eax, 'MADT'
+	je .madt
+	
+	cmp eax, 'APIC'
+	je .madt
+	
+	; Unsupported table; return
+	jmp .end
+	
+.madt:
+	call acpi_madt_parse
+	
+	; Fall through to end
+.end:
+	; Restore
+	pop rax
+	ret
+	
+;-------------------------------------------------------------------------------
+; ACPI - MADT Parsing
+;-------------------------------------------------------------------------------
+
+; Parses the MADT at rsi.
+;
+; Parameters:
+;	rsi The address of the MADT to parse.
+acpi_madt_parse:
+	; Store
+	push rax
+	push rcx
+	push rdx
+	push rsi
+
+	; LAPIC address
+	mov rax, [rsi + acpi_madt.lapic_addr] 	; Get LAPIC address and
+	mov [info_table.lapic_paddr], rax		; write it into the info table
+
+	; PIC availability
+	mov rax, [rsi + acpi_madt.flags]		; Get flags
+	and rax, ACPI_MADT_PCAT_COMPAT			; Check for PIC availability
+	cmp rax, 0
+	je .no_pic
+
+	or byte [info_table.flags], INFO_FLAG_PIC ; Set the PIC flag in info table
+
+.no_pic:
+	; Devices
+	xor rcx, rcx									; Clear rcx for dword length
+	mov ecx, dword [rsi + acpi_sdt_header.length]	; Get length of MADT
+	add rsi, 44										; Advance behing headers
+	sub rcx, 44										; Subtract length of headers
+
+.next_device:
+	; Identify device
+	mov al, byte [rsi]						; Get device type
+
+	cmp al, ACPI_MADT_DEV_LAPIC				; LAPIC?
+	je .dev_lapic							; Handle LAPIC
+
+;	cmp al, ACPI_MADT_DEV_IOAPIC			; I/O APIC?
+;	je .dev_ioapic							; Handle I/O APIC
+
+	jmp .dev_handled						; Unknown device
+
+.dev_lapic:
+	call acpi_madt_lapic_parse				; Parse LAPIC
+	jmp .dev_handled						; Device handled
+
+;.dev_ioapic:
+;	call acpi_madt_ioapic_parse				; Parse I/O APIC
+;	jmp .dev_handled						; Device handled
+
+.dev_handled:
+	; Device left?
+	xor rdx, rax							; Clear rdx to store length
+	mov dl, byte [rsi + 0x1]				; Get length
+	sub rcx, rdx							; Subtract from remaining length
+	add rsi, rdx							; Add to pointer
+	cmp rcx, 0								; Bytes remaining?
+	jne .next_device						; Handle next device
+
+	; Restore
+	pop rsi
+	pop rdx
+	pop rcx
+	pop rax
+	ret
+
+; Parses an LAPIC entry and adds the processor to the info table.
+;
+; Parameters:
+;	rsi The address of the LAPIC entry.
+acpi_madt_lapic_parse:
+	; Store
+	push rax
+	push rsi
+	push rdi
+
+	; Check if enabled
+	mov eax, dword [rsi + acpi_madt_lapic.flags]	; Load flags
+	and eax, ACPI_MADT_LAPIC_ENABLED				; Check enabled flag
+	cmp eax, 0										; Not enabled?
+	je .end											; Ignore this CPU
+
+	; Add CPU
+	mov rdi, qword [info_proc_next]			; Get free processor descriptor
+	add rsi, 2								; Advance to ACPI id
+	lodsw									; Load ACPI and APIC id
+	stosw									; Store ACPI and APIC id
+	mov qword [info_proc_next], rdi			; Update next proc pointer
+	inc byte [info_table.proc_count]     	; Increase processor count
+
+	; Restore
+.end:
+	pop rdi
+	pop rsi
+	pop rax
+	ret

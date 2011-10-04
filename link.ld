@@ -9,8 +9,6 @@ SECTIONS
         *(.text)
     }
 
-    . = ALIGN(4096);
-
     .data :
     {
         data = .; _data = .; __data = .;
@@ -23,7 +21,6 @@ SECTIONS
     {
         bss = .; _bss = .; __bss = .;
         *(.bss)
-        . = ALIGN(4096);
     }
 
     end = .; _end = .; __end = .;

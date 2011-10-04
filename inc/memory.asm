@@ -18,23 +18,5 @@
 ; Memory Layout - Physical
 ;-------------------------------------------------------------------------------
 
-; Physical addresses of Hydrogen info tables
-;%define MEMORY_INFO_TABLE_PADDR		0x8000
-;%define MEMORY_INFO_PROC_PADDR		0x9000
-;%define MEMORY_INFO_MODS_PADDR		0xA000
-;%define MEMORY_INFO_MMAP_PADDR		0xB000
-
-; Physical addresses of system tables and their pointers
-;%define MEMORY_SYS_IDT_PADDR		0xC000
-;%define MEMORY_SYS_GDT_PADDR		0xD000
-
-; Physical addresses of boot paging structures
-;%define MEMORY_PAGE_PML4_PADDR		0xE000
-;%define MEMORY_PAGE_PDP_IDN_PADDR	0xF000
-;%define MEMORY_PAGE_PD_IDN_PADDR	0x10000 ; 0x1000 x 64
-
-; Stacks
-;%define MEMORY_STACK_PADDR			0x50000 ; 0x1000 x 32 (max)
-
 ; Video Memory
 %define MEMORY_SCREEN_PADDR			0xb8000

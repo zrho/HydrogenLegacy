@@ -11,7 +11,7 @@ all:
 	$(ASM) $(ASMFLAGS) $(MAIN_S) -o $(MAIN_O)
 	
 link: all
-	ld -zmax-page-size=4096 -T link.ld -o build/hydrogen.bin build/hydrogen.o
+	ld -z max-page-size=4096 -T link.ld -o build/hydrogen.bin build/hydrogen.o
 	
 clean:
 	rm $(MAIN_O)

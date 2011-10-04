@@ -35,3 +35,10 @@
 
 %define IO_VIDEO_HIGH_CUR	14
 %define IO_VIDEO_LOW_CUR	15
+
+;-------------------------------------------------------------------------------
+; Screen - Special characters
+;-------------------------------------------------------------------------------
+
+%define CHAR_NL				0xA
+%define CHAR_CR				0xD

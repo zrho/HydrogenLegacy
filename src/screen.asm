@@ -64,6 +64,62 @@ screen_write:
 	pop rax
 	ret
 
+; Writes the number in rax in hexadecimal representation.
+;
+; Parameter:
+; 	rax The number to write.
+screen_write_hex:
+	; Store
+	push rax
+	push rbx
+	push rcx
+
+	; Prepare
+	mov rcx, 16							; Remaining nibbles
+	mov rbx, rax						; Save the number to write in rbx
+	xor rax, rax						; Place for character
+
+	; Print prefix (0x)
+	mov al, "0"							; Print zero
+	call screen_put
+	mov al, "x"							; Print x
+	call screen_put
+
+.next_nibble:
+	; Load nibble
+	mov rax, rbx						; Load current value
+	shr rax, 60							; Shift value to get nibble
+	shl rbx, 4							; Move rbx to next nibble
+
+	; Check nibble
+	cmp rax, 10							; Is numerical?
+	jl .nibble_digit
+
+	; Get character
+	sub rax, 10							; Subtract to get offset
+	add rax, "A"						; 10 => "A", 11 => "B" etc.
+	jmp .nibble_print					; Print
+
+.nibble_digit:
+	; Get digit
+	add rax, "0"						; 0 => "0", 1 => "1" etc.
+
+	; Fall through
+.nibble_print:
+	call screen_put						; Print character
+
+	; Check for next nibble
+	dec rcx								; Decrease count of remaining nibbles
+	cmp rcx, 0							; No nibble remaining?
+	jne .next_nibble
+
+	; Restore
+	pop rcx
+	pop rbx
+	pop rax
+	ret
+
+
 ; Puts a single character on the screen.
 ;
 ; Parameters:

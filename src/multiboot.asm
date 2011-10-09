@@ -67,6 +67,9 @@ multiboot_mmap_parse:
 	push rsi
 	push rdi
 
+	; Write mmap length
+	mov byte [info_table.mmap_count], cl
+
 	; Load target address
 	mov rdi, info_mmap
 
@@ -133,6 +136,9 @@ multiboot_mods_parse:
 	push rcx
 	push rsi
 	push rdi
+
+	; Write mod list length length
+	mov byte [info_table.mod_count], cl
 
 	; Load target address
 	mov rdi, info_mods

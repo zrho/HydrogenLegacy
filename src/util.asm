@@ -80,3 +80,38 @@ string_copy:
 	pop rsi
 	pop rax
 	ret
+
+; Copies rcx bytes from rsi to rdi.
+;
+; Parameters:
+; 	rsi The address to copy from.
+; 	rdi The address to copy to.
+; 	rcx The number of bytes to copy.
+memory_copy:
+	; No bytes to copy?
+	cmp rcx, 0
+	jne .begin
+	ret
+
+.begin:
+	; Store
+	push rax
+	push rcx
+	push rsi
+	push rdi
+
+.next_byte:
+	; Copy byte
+	lodsb
+	stosb
+
+	; Byte left?
+	dec rcx
+	cmp rcx, 0
+	jne .next_byte
+
+	; Restore
+	pop rdi
+	pop rsi
+	pop rcx
+	pop rax

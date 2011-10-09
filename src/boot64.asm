@@ -28,7 +28,9 @@ boot64_bsp:
 
 	call multiboot_parse					; Parse multiboot tables
 	call acpi_parse							; Parse ACPI tables
-	;call modules_move						; Move modules to new location
+
+	call modules_sort						; Sort the modules (for moving)
+	call modules_move						; Move modules to new location
 
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT

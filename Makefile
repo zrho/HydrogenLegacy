@@ -12,6 +12,7 @@ all:
 	
 link: all
 	ld -z max-page-size=4096 -T link.ld -o build/hydrogen.bin build/hydrogen.o
+	objcopy -x build/hydrogen.bin build/hydrogen.bin
 	
 clean:
 	rm $(MAIN_O)

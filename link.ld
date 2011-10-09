@@ -4,24 +4,23 @@ SECTIONS
 {
     .text 0x100000 :
     {
-        code = .; _code = .; __code = .;
-        *(.multiboot)
+        code = .;
         *(.text)
     }
 
     .data :
     {
-        data = .; _data = .; __data = .;
+        data = .;
         *(.data)
         *(.rodata)
-        . = ALIGN(4096);
     }
 
     .bss :
     {
-        bss = .; _bss = .; __bss = .;
+    	. = ALIGN(4096);
+        bss = .;
         *(.bss)
     }
 
-    end = .; _end = .; __end = .;
+    end = .;
 }

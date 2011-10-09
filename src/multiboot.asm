@@ -40,10 +40,12 @@ multiboot_parse:
 	mov ecx, dword [rax + multiboot_info.mmap_length]	; Load mmap length
 	call multiboot_mmap_parse							; Parse memory map
 
-	; Parse module list (TODO: DWORD!)
-	;mov rsi, [rax + multiboot_info.mods_addr]		; Load mods address
-	;mov rcx, [rax + multiboot_info.mods_count]	; Load mods count
-	;call multiboot_mods_parse					; Parse module list
+	; Parse module list
+	xor rsi, rsi
+	mov esi, dword [rax + multiboot_info.mods_addr]		; Load mods address
+	xor rcx, rcx
+	mov ecx, dword [rax + multiboot_info.mods_count]	; Load mods count
+	call multiboot_mods_parse							; Parse module list
 
 	; Restore
 	pop rdi
@@ -110,4 +112,68 @@ multiboot_mmap_parse:
 	pop rax
 	ret
 
-multiboot_mods_parse: ret
+; Parses the module list at rsi with rcx entries and fills the hydrogen module
+; list.
+;
+; TODO: Check why the cmdline string seems always to be empty with GRUB2.
+;
+; Parameters:
+; 	rsi	The address of the multiboot mod list.
+; 	rcx	The number of entries in the multiboot mod list.
+multiboot_mods_parse:
+	; Any modules loaded?
+	cmp rcx, 0
+	jne .parse
+	ret
+
+.parse:
+	; Store
+	push rax
+	push rbx
+	push rcx
+	push rsi
+	push rdi
+
+	; Load target address
+	mov rdi, info_mods
+
+.next_entry:
+	; Write begin address
+	xor rax, rax										; Clear rax for dword
+	mov eax, dword [rsi + multiboot_mod_list.mod_start]	; Load start address
+	mov rbx, rax										; Store val for len calc
+	stosq
+
+	; Write length
+	mov eax, dword [rsi + multiboot_mod_list.mod_end]	; Load end address
+	sub rax, rbx										; Subtract start address
+	stosq
+
+	; Copy string
+	push rsi											; Save rsi
+	push rdi											; and rdi
+	xor rax, rax
+	mov eax, dword [rsi + multiboot_mod_list.cmdline]	; Get string address
+	mov rsi, rax										; str address to rsi
+
+	mov rdi, qword [info_strings]	; Get target address
+	xchg rax, rdi					; Save rdi on rax
+	call string_copy				; Copy the string
+	mov qword [info_strings], rdi	; Update string heap
+	pop rdi							; Restore rdi
+	pop rsi							; and rsi
+	stosq							; Write stored rax to descriptor
+
+	; Next module?
+	add rsi, 16						; Add size of 16 bytes
+	dec rcx							; Decrease remaining module count
+	cmp	rcx, 0						; No module left?
+	jne .next_entry
+
+	; Restore
+	pop rdi
+	pop rsi
+	pop rcx
+	pop rbx
+	pop rax
+	ret

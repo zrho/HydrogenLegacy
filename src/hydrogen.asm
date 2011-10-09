@@ -23,15 +23,19 @@
 %include "../inc/acpi.asm"
 %include "../inc/page.asm"
 %include "../inc/multiboot.asm"
+%include "../inc/util.asm"
 
 ;-------------------------------------------------------------------------------
 ; Code
 ;-------------------------------------------------------------------------------
 %include "boot32.asm"
 %include "boot64.asm"
+%include "multiboot.asm"
+;%include "modules.asm"
 %include "interrupts.asm"
 %include "screen.asm"
 %include "acpi.asm"
+%include "util.asm"
 
 ;-------------------------------------------------------------------------------
 ; Data and BSS

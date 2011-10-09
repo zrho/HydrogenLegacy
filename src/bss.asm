@@ -21,10 +21,10 @@ bits 64
 ; BSS - Info Tables
 ;-------------------------------------------------------------------------------
 
-align 4096
-info_proc:	resb 0x1000
-info_mods:	resb 0x1000
-info_mmap:	resb 0x1000
+info_proc:		resb 0x1000
+info_mods:		resb 0x1000
+info_mmap:		resb 0x1000
+info_strings:	resb 0x1000
 
 ;-------------------------------------------------------------------------------
 ; BSS - System Tables

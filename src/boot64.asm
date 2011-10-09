@@ -26,7 +26,7 @@ boot64_bsp:
 	cli										; Clear interrupts
 	and rsp, ~0xFFF							; Reset stack
 
-	;call multiboot_parse					; Parse multiboot tables
+	call multiboot_parse					; Parse multiboot tables
 	call acpi_parse							; Parse ACPI tables
 	;call modules_move						; Move modules to new location
 

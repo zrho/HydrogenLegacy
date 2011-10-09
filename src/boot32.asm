@@ -73,7 +73,7 @@ boot32:
 
 .bsp:										; Now we are initializing the BSP
 	mov byte [boot32_bsp], 0x0				; All other CPUs are APs
-	mov dword [boot32_mboot], eax			; Store the multiboot info tbl ptr
+	mov dword [boot32_mboot], ebx			; Store the multiboot info tbl ptr
 
 	call boot32_gdt_init					; Initialize GDT
 	call boot32_gdt							; Load 64 bit GDT

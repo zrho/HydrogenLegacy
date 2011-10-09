@@ -47,6 +47,7 @@ info_table:
 	.mmap_count:		db 0x0
 
 info_proc_next:	dq info_proc
+info_string_next: dq info_strings
 
 ;-------------------------------------------------------------------------------
 ; System Tables and their pointers

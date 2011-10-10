@@ -39,6 +39,7 @@ screen_clear:
 	pop rdi
 	pop rcx
 	pop rax
+	ret
 
 ; Writes a null-terminated string to the screen.
 ;

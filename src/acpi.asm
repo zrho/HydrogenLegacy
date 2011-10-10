@@ -256,6 +256,8 @@ acpi_madt_parse:
 acpi_madt_lapic_parse:
 	; Store
 	push rax
+	push rbx
+	push rdx
 	push rsi
 	push rdi
 
@@ -265,17 +267,31 @@ acpi_madt_lapic_parse:
 	cmp eax, 0										; Not enabled?
 	je .end											; Ignore this CPU
 
+	; Load ACPI and APIC ids
+	xor rbx, rbx
+	xor rdx, rdx
+	mov bl, byte [rsi + acpi_madt_lapic.acpi_id]	; Load ACPI id
+	mov dl, byte [rsi + acpi_madt_lapic.apic_id]	; Load APIC id
+
 	; Add CPU
-	mov rdi, qword [info_proc_next]			; Get free processor descriptor
-	add rsi, 2								; Advance to ACPI id
-	lodsw									; Load ACPI and APIC id
-	stosw									; Store ACPI and APIC id
-	mov qword [info_proc_next], rdi			; Update next proc pointer
-	inc byte [info_table.proc_count]     	; Increase processor count
+	info_proc_addr rdi, rdx							; Address for process descr
+	mov byte [rdi], bl								; Write ACPI id
+	mov byte [rdi + 1], dl							; Write APIC id
+	mov word [rdi + 2], INFO_PROC_FLAG_PRESENT		; Write flags
+
+	; Update processor count in info table
+	xor rax, rax
+	mov al, byte [info_table.proc_count]
+	inc dl											; len = max(apic id) + 1
+	cmp dl, al										; List expanded?
+	jle .end
+	mov byte [info_table.proc_count], dl
 
 	; Restore
 .end:
 	pop rdi
 	pop rsi
+	pop rdx
+	pop rbx
 	pop rax
 	ret

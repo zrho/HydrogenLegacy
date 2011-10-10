@@ -46,7 +46,6 @@ info_table:
 	.mod_count:			db 0x0
 	.mmap_count:		db 0x0
 
-info_proc_next:	dq info_proc
 info_string_next: dq info_strings
 
 ;-------------------------------------------------------------------------------
@@ -66,6 +65,25 @@ sys_gdtr64:
 	dw 0x27
 .pointer:
 	dq sys_gdt64
+
+;-------------------------------------------------------------------------------
+; Kernel
+;-------------------------------------------------------------------------------
+
+; The address of the descriptor of the module that hosts the kernel
+kernel_module: dq 0x0
+
+;-------------------------------------------------------------------------------
+; Messages
+;-------------------------------------------------------------------------------
+
+message_header:
+	db "Hydrogen v0.1b - http://github.com/farok/Hydrogen", CHAR_NL
+	db "Copyright (c) 2011 by Lukas Heidemann", CHAR_NL, 0
+
+message_no_kernel:
+	db "PANIC: No kernel binary could be found. Make sure to pass "
+	db "the kernel as a module named '/boot/kernel.bin'.", 0
 
 ;-------------------------------------------------------------------------------
 ; Misc

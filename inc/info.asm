@@ -25,6 +25,10 @@
 ; Info Table - Secondary Info Structures
 ;-------------------------------------------------------------------------------
 
+%define INFO_PROC_FLAG_PRESENT	(1 << 0)
+%define INFO_PROC_FLAG_BSP		(1 << 1)
+%define INFO_PROC_FLAG_READY	(1 << 2)
+
 ; Info structure describing a processor.
 ;
 ; .acpi_id		The ACPI id of the processor.
@@ -32,6 +36,7 @@
 struc hydrogen_info_proc
 	.acpi_id					RESB	1
 	.apic_id					RESB	1
+	.flags						RESB	2
 endstruc
 
 ; Info structure describing a module.
@@ -55,3 +60,19 @@ struc hydrogen_info_mmap
 	.length						RESB	8
 	.available					RESB	1
 endstruc
+
+; Macro for retrieving the address of a process descriptor for a processor
+; with a given id.
+;
+; Parameters:
+; 	%1 Register to load the address to.
+;	%2 APIC id of the processor or register containing the id.
+;
+; Examples:
+; 	info_proc_addr rdi, 0x2
+; 	info_proc_addr rsi, rax
+%macro info_proc_addr 2
+	mov %1, %2				; Load index into target register
+	shl %1, 2				; Multiply with four to get offset
+	add %1, info_proc		; Add list address
+%endmacro

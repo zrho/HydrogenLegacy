@@ -55,21 +55,19 @@ multiboot_header:
 global boot32
 boot32:
 	cli										; Clear interrupts
-
 	add dword [boot32_stack_next], 0x1000	; Prepare next stack
 	mov esp, dword [boot32_stack_next]		; Load stack
 
 	call boot32_pae							; Enable PAE
 	call boot32_a20							; Enable A20
 	call boot32_long_mode					; Enable LM
-
 	cmp byte [boot32_bsp], 1				; Check whether this is the BSP
 	je .bsp
 
 .ap:										; Now we are initializing an AP
 	call boot32_gdt							; Load 64 bit GDT
 	call boot32_paging						; Enable paging
-	;jmp 0x08:boot64_ap						; Jump to 64 bit AP entry point
+	jmp 0x08:boot64_ap						; Jump to 64 bit AP entry point
 
 .bsp:										; Now we are initializing the BSP
 	mov byte [boot32_bsp], 0x0				; All other CPUs are APs

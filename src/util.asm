@@ -115,3 +115,14 @@ memory_copy:
 	pop rsi
 	pop rcx
 	pop rax
+	ret
+
+wait_busy:
+	push rcx
+	mov rcx, 2000
+.next:
+	dec rcx
+	cmp rcx, 0
+	jne .next
+	pop rcx
+	ret

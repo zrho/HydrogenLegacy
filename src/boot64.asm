@@ -23,9 +23,16 @@ bits 64
 
 ; 64 bit entry point for the BSP.
 boot64_bsp:
+	; Prepare
 	cli										; Clear interrupts
 	and rsp, ~0xFFF							; Reset stack
 
+	; Welcome message
+	call screen_clear
+	mov rsi, message_header
+	call screen_write
+
+	; Initialize the system
 	call multiboot_parse					; Parse multiboot tables
 	call acpi_parse							; Parse ACPI tables
 
@@ -34,5 +41,28 @@ boot64_bsp:
 
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
+	call lapic_enable						; Enable the LAPIC
+	call smp_init							; Initialize SMP
 
+	; Initialize the kernel
+	;call kernel_find						; Search for the kernel
+	;call kernel_map							; Map the kernel
+
+	; Jump to the kernel
 	jmp $
+	;jmp MEMORY_KERNEL_ENTRY_VADDR
+
+boot64_ap:
+	; Initialization
+	cli										; Clear interrupts
+	and rsp, ~0xFFF							; Reset stack
+
+	call int_load							; Load IDT
+	call lapic_enable						; Enable the LAPIC
+	call smp_init_ap						; Initialize SMP from AP side
+
+	; Halt loop
+	sti
+.halt:
+	hlt
+	jmp .halt

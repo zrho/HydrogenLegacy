@@ -1,0 +1,67 @@
+Hydrogen
+======================
+Hydrogen is a loader for AMD64 kernels. While being loaded itself by any
+multiboot 1 compatible boot loader (tested with GRUB2) that supports loading of
+ELF64 binaries, it sets up the environment for an AOUT AMD64 kernel attached as
+a multiboot module. 
+
+When developing operating systems for AMD64 one is faced with lots of legacy
+dating back to the roots of X86. Hydrogen is made to handle most of it to hand
+the OS developers a clean and mostly legacy-free system.
+
+Ships with a compiled copy of the GRUB2 bootloader (as stage2_eltorito image).
+This binary can easily be replaced by any other compilation of GRUB2 that supports
+iso9660 and multiboot or any other compatible boot loader.
+
+Features
+----------------------
+
+  - Multiprocessor Support: Hydrogen parses the system's ACPI tables to discover
+    installed and enabled processors, boots them into long mode and leaves them
+    in a halted state.
+  - Multiboot Compatibility: Hydrogen is compatible with multiboot 1 bootloaders
+    that are capable of loading ELF64 binaries. That way it profits from the wide
+    variety of hardware, file systems and boot procedures that is supported by
+    GRUB2 and others.
+  - Information Table: Hydrogen gathers the information it can find in ACPI and
+    multiboot tables and puts them into a single info structure storing information
+    important for a kernel to know about the system (memory layout, number of
+    processors, modules).
+  - Clean Memory Layout: Hydrogen leaves the memory in a well defined state. No
+    need to make assumptions about memory layout anymore.
+
+Build Requirements
+----------------------
+Hydrogen requires the following tools to build:
+
+  - GNU ld (tested version: 2.21.51.0.6)
+  - GNU objcopy (tested version: 2.21.51.0.6)
+  - mkisofs (tested version: 1.1.11)
+  - nasm (tested version: 2.09.07)
+  
+Hydrogen has been tested using following emulators:
+
+  - bochs (tested version: 2.4.6)
+  
+Limitations
+----------------------
+Currenty Hydrogen identity maps the first 64GB of physical memory using 2MB
+pages. Behaviour on systems with more than 64GB of memory installed is undefined.
+
+Related Work
+----------------------
+In development of the Hydrogen Loader the project Pure64 [1] by Return Infinity
+has been a great inspiration. While serving a quite similar purpose and also
+sharing the basic design philosophy, Pure64 is a stage 2 loader and has to care
+about loading the kernel from the boot medium itself, which is why to the date
+when Hydrogen was started it only supported FAT16 as a file system and did not
+support loading from devices other than a hard drive.
+
+Hydrogen has been developed out of the wish to profit from GRUB2's wide support
+of hardware, file systems and devices while still not having to care about the
+annoying and lengthy setup required for modern AMD64 systems.
+
+The author thanks the Return Infinity team for their great work and the inspiration
+that came with it.
+
+[1] http://www.returninfinity.com/pure64.html

@@ -34,18 +34,6 @@ boot32_mboot: dd 0x0
 ; Info Table
 ;-------------------------------------------------------------------------------
 
-; The info table to be passed to the kernel.
-info_table:
-	.free_mem_begin:	dq 0x0
-	.command_line:		dq 0x0
-	.lapic_paddr:		dq 0x0
-	.idtr_paddr:		dq sys_idtr64
-	.gdtr_paddr:		dq sys_gdtr64
-	.flags:				db 0x0
-	.proc_count:		db 0x0
-	.mod_count:			db 0x0
-	.mmap_count:		db 0x0
-
 info_string_next: dq info_strings
 
 ;-------------------------------------------------------------------------------
@@ -83,7 +71,10 @@ message_header:
 
 message_no_kernel:
 	db "PANIC: No kernel binary could be found. Make sure to pass "
-	db "the kernel as a module named '/boot/kernel.bin'.", 0
+	db "the kernel as a module with cmdline beginning with 'kernel64'.", 0
+
+message_kernel:
+	db "Starting kernel...", 0
 
 ;-------------------------------------------------------------------------------
 ; Misc

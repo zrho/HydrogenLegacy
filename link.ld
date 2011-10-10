@@ -2,7 +2,13 @@ OUTPUT_FORMAT(elf64-x86-64)
 ENTRY(boot32)
 SECTIONS
 {
-    .text 0x100000 :
+	.bss 0x100000 :
+    {
+        bss = .;
+        *(.bss)
+    }
+
+    .text :
     {
         code = .;
         *(.text)
@@ -13,13 +19,6 @@ SECTIONS
         data = .;
         *(.data)
         *(.rodata)
-    }
-
-    .bss :
-    {
-    	. = ALIGN(4096);
-        bss = .;
-        *(.bss)
     }
 
     end = .;

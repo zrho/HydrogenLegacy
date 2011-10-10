@@ -162,13 +162,13 @@ multiboot_mods_parse:
 	mov eax, dword [rsi + multiboot_mod_list.cmdline]	; Get string address
 	mov rsi, rax										; str address to rsi
 
-	mov rdi, qword [info_strings]	; Get target address
-	xchg rax, rdi					; Save rdi on rax
-	call string_copy				; Copy the string
-	mov qword [info_strings], rdi	; Update string heap
-	pop rdi							; Restore rdi
-	pop rsi							; and rsi
-	stosq							; Write stored rax to descriptor
+	mov rdi, qword [info_string_next]	; Get target address
+	mov rax, rdi					 	; Save rdi on rax
+	call string_copy				 	; Copy the string
+	mov qword [info_string_next], rdi	; Update string heap
+	pop rdi								; Restore rdi
+	pop rsi								; and rsi
+	stosq								; Write stored rax to descriptor
 
 	; Next module?
 	add rsi, 16						; Add size of 16 bytes

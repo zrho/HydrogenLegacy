@@ -39,7 +39,7 @@
 %include "acpi.asm"
 %include "util.asm"
 %include "smp.asm"
-;%include "kernel.asm"
+%include "kernel.asm"
 
 ;-------------------------------------------------------------------------------
 ; Data and BSS

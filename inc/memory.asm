@@ -20,3 +20,10 @@
 
 ; Video Memory
 %define MEMORY_SCREEN_PADDR			0xb8000
+
+;-------------------------------------------------------------------------------
+; Memory Layout - Virtual
+;-------------------------------------------------------------------------------
+
+; Kernel entry point address (virtual)
+%define MEMORY_KERNEL_ENTRY_VADDR	0xFFFFFF0000000000

@@ -45,12 +45,15 @@ boot64_bsp:
 	call smp_init							; Initialize SMP
 
 	; Initialize the kernel
-	;call kernel_find						; Search for the kernel
-	;call kernel_map							; Map the kernel
+	call kernel_find						; Search for the kernel
+	call kernel_map							; Map the kernel
 
 	; Jump to the kernel
-	jmp $
-	;jmp MEMORY_KERNEL_ENTRY_VADDR
+	mov rsi, message_kernel
+	call screen_write
+
+	mov rax, MEMORY_KERNEL_ENTRY_VADDR
+	jmp rax
 
 boot64_ap:
 	; Initialization

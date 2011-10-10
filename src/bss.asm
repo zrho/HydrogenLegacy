@@ -21,6 +21,19 @@ bits 64
 ; BSS - Info Tables
 ;-------------------------------------------------------------------------------
 
+; The info table to be passed to the kernel.
+info_table:
+	.free_mem_begin:	resb 4
+	.command_line:		resb 4
+	.lapic_paddr:		resb 4
+	.idtr_paddr:		resb 4
+	.gdtr_paddr:		resb 4
+	.flags:				resb 1
+	.proc_count:		resb 1
+	.mod_count:			resb 1
+	.mmap_count:		resb 1
+	.reserved:			resb 4096 - 24
+
 info_proc:		resb 0x1000
 info_mods:		resb 0x1000
 info_mmap:		resb 0x1000
@@ -37,9 +50,12 @@ sys_gdt64:	resb 0x1000
 ; BSS - Paging
 ;-------------------------------------------------------------------------------
 
-paging_pml4:	resb 0x1000
-paging_pdp_idn:	resb 0x1000
-paging_pd_idn:	resb (0x1000 * 64)
+paging_pml4:		resb 0x1000
+paging_pdp_idn:		resb 0x1000
+paging_pd_idn:		resb (0x1000 * 64)
+paging_pdp_kernel: 	resb 0x1000
+paging_pd_kernel:	resb 0x1000
+paging_pt_kernel:	resb 0x1000
 
 ;-------------------------------------------------------------------------------
 ; BSS - Stacks

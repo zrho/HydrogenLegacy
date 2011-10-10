@@ -2,7 +2,7 @@ Hydrogen
 ======================
 Hydrogen is a loader for AMD64 kernels. While being loaded itself by any
 multiboot 1 compatible boot loader (tested with GRUB2) that supports loading of
-ELF64 binaries, it sets up the environment for an AOUT AMD64 kernel attached as
+ELF64 binaries, it sets up the environment for an AMD64 kernel attached as
 a multiboot module. 
 
 When developing operating systems for AMD64 one is faced with lots of legacy
@@ -47,6 +47,14 @@ Limitations
 ----------------------
 Currenty Hydrogen identity maps the first 64GB of physical memory using 2MB
 pages. Behaviour on systems with more than 64GB of memory installed is undefined.
+
+How To Use
+----------------------
+Hydrogen searches for a multiboot module with the cmdline string 'kernel64',
+maps it to the higher half address 0xFFFFFF0000000000 and onwards (maximum size:
+2 MB) and jumps to that address afterwards, so be sure your flat kernel binary
+begins with its entry point. Loading of more sophisticated type of binaries,
+like ELF64 may be implemented in the future.
 
 Related Work
 ----------------------

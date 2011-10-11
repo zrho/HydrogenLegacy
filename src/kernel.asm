@@ -131,7 +131,7 @@ kernel_map:
 	jg .page_map
 
 .end:
-	mov rsi, MEMORY_KERNEL_ENTRY_VADDR
+	mov rsi, HYDROGEN_KERNEL_ENTRY_VADDR
 	mov rax, qword [rsi]
 
 	; Restore

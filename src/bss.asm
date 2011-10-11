@@ -23,16 +23,14 @@ bits 64
 
 ; The info table to be passed to the kernel.
 info_table:
-	.free_mem_begin:	resb 4
-	.command_line:		resb 4
-	.lapic_paddr:		resb 4
-	.idtr_paddr:		resb 4
-	.gdtr_paddr:		resb 4
+	.free_mem_begin:	resb 8
+	.command_line:		resb 8
+	.lapic_paddr:		resb 8
 	.flags:				resb 1
 	.proc_count:		resb 1
 	.mod_count:			resb 1
 	.mmap_count:		resb 1
-	.reserved:			resb 4096 - 24
+	.reserved:			resb 4096 - 28
 
 info_proc:		resb 0x1000
 info_mods:		resb 0x1000

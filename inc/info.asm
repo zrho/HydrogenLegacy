@@ -15,14 +15,34 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;-------------------------------------------------------------------------------
-; Info Table - Flags
+; Info Table - Main Table
 ;-------------------------------------------------------------------------------
 
 ; Flag indicating the presence of a 8259 PIC
 %define INFO_FLAG_PIC (1 << 0)
 
+; Main info structure containing important information about the system.
+;
+; .free_mem_begin	Beginning of the memory area, where it is free to write to
+;					without having to fear to override some data.
+; .command_line		The command line string with which the kernel has been loaded.
+; .lapic_paddr		The physical address of the LAPIC.
+; .flags			The system's flags.
+; .proc_count		Length of processor list.
+; .mod_count		Length of module list.
+; .mmap_count		Length of memory map.
+struc hydrogen_info_table
+	.free_mem_begin:	RESB 8
+	.command_line:		RESB 8
+	.lapic_paddr:		RESB 8
+	.flags:				RESB 1
+	.proc_count:		RESB 1
+	.mod_count:			RESB 1
+	.mmap_count:		RESB 1
+endstruc
+
 ;-------------------------------------------------------------------------------
-; Info Table - Secondary Info Structures
+; Info Table - Processor
 ;-------------------------------------------------------------------------------
 
 %define INFO_PROC_FLAG_PRESENT	(1 << 0)
@@ -39,6 +59,10 @@ struc hydrogen_info_proc
 	.flags						RESB	2
 endstruc
 
+;-------------------------------------------------------------------------------
+; Info Table - Modules
+;-------------------------------------------------------------------------------
+
 ; Info structure describing a module.
 ;
 ; .begin		The 64 bit physical address the module begins at.
@@ -50,6 +74,10 @@ struc hydrogen_info_mod
 	.cmdline					RESB	8
 endstruc
 
+;-------------------------------------------------------------------------------
+; Info Table - Memory Map
+;-------------------------------------------------------------------------------
+
 ; Info structure descibing an entry in the memory map.
 ;
 ; .begin		The 64 bit physical address the covered section begins at.
@@ -60,19 +88,3 @@ struc hydrogen_info_mmap
 	.length						RESB	8
 	.available					RESB	1
 endstruc
-
-; Macro for retrieving the address of a process descriptor for a processor
-; with a given id.
-;
-; Parameters:
-; 	%1 Register to load the address to.
-;	%2 APIC id of the processor or register containing the id.
-;
-; Examples:
-; 	info_proc_addr rdi, 0x2
-; 	info_proc_addr rsi, rax
-%macro info_proc_addr 2
-	mov %1, %2				; Load index into target register
-	shl %1, 2				; Multiply with four to get offset
-	add %1, info_proc		; Add list address
-%endmacro

@@ -15,15 +15,31 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;-------------------------------------------------------------------------------
-; Memory Layout - Physical
+; Hydrogen API - Memory Layout
 ;-------------------------------------------------------------------------------
 
-; Video Memory
-%define MEMORY_SCREEN_PADDR			0xb8000
+%define HYDROGEN_MEMORY_INFO			HYDROGEN_MEMORY + 0x0
+%define HYDROGEN_MEMORY_INFO_PROC		HYDROGEN_MEMORY + 0x01000
+%define HYDROGEN_MEMORY_INFO_MODS		HYDROGEN_MEMORY + 0x02000
+%define HYDROGEN_MEMORY_INFO_MMAP		HYDROGEN_MEMORY + 0x03000
+%define HYDROGEN_MEMORY_INFO_STRINGS	HYDROGEN_MEMORY + 0x04000
+
+%define HYDROGEN_MEMORY_SYS_IDT64		HYDROGEN_MEMORY + 0x05000
+%define HYDROGEN_MEMORY_SYS_GDT64		HYDROGEN_MEMORY + 0x06000
+
+%define HYDROGEN_MEMORY_PAGE_PML4		HYDROGEN_MEMORY + 0x07000
+%define HYDROGEN_MEMORY_PAGE_PDP_IDN	HYDROGEN_MEMORY + 0x08000
+%define HYDROGEN_MEMORY_PAGE_PD_IDN		HYDROGEN_MEMORY + 0x09000
+%define HYDROGEN_MEMORY_PAGE_PDP_KERNEL	HYDROGEN_MEMORY + 0x49000
+%define HYDROGEN_MEMORY_PAGE_PD_KERNEL	HYDROGEN_MEMORY + 0x4A000
+%define HYDROGEN_MEMORY_PAGE_PT_KERNEL	HYDROGEN_MEMORY + 0x4B000
+
+%define HYDROGEN_MEMORY_STACK			HYDROGEN_MEMORY + 0x4C000
+%define HYDROGEN_MEMORY_END				HYDROGEN_MEMORY + 0x6C000
 
 ;-------------------------------------------------------------------------------
-; Memory Layout - Virtual
+; Hydrogen API - Other addresses
 ;-------------------------------------------------------------------------------
 
-; Kernel entry point address (virtual)
-%define MEMORY_KERNEL_ENTRY_VADDR	0xFFFFFF0000000000
+%define HYDROGEN_MEMORY_SCREEN_PADDR	0xb8000
+%define HYDROGEN_KERNEL_ENTRY_VADDR		0xFFFFFF0000000000

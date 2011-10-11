@@ -52,7 +52,7 @@ boot64_bsp:
 	mov rsi, message_kernel
 	call screen_write
 
-	mov rax, MEMORY_KERNEL_ENTRY_VADDR
+	mov rax, HYDROGEN_KERNEL_ENTRY_VADDR
 	jmp rax
 
 boot64_ap:

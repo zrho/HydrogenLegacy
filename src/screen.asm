@@ -25,10 +25,10 @@ screen_clear:
 	push rdi
 
 	; Write spaces
-	mov ax, ' ' | SCREEN_ATTR			; Space with default attributes
-	mov rdi, MEMORY_SCREEN_PADDR		; Load address of the video memory
-	mov rcx, SCREEN_SIZE				; Load size of the screen
-	rep stosw							; Clear screen
+	mov ax, ' ' | SCREEN_ATTR				; Space with default attributes
+	mov rdi, HYDROGEN_MEMORY_SCREEN_PADDR	; Load address of the video memory
+	mov rcx, SCREEN_SIZE					; Load size of the screen
+	rep stosw								; Clear screen
 
 	; Reset cursor
 	mov word [screen.cursor_x], 0		; Reset cursor x
@@ -209,7 +209,7 @@ screen_cursor_char:
 	call screen_offset					; Get screen offset
 	mov rdx, 2							; Load 2
 	mul rdx								; Multiply with 2
-	add rax, MEMORY_SCREEN_PADDR		; Add video memory address
+	add rax, HYDROGEN_MEMORY_SCREEN_PADDR	; Add video memory address
 	xchg rax, rdi						; Swap rax and rdi again (rax preserved)
 
 	; Restore
@@ -230,8 +230,8 @@ screen_scroll:
 	push rdi
 
 	; Move current buffer one line up (discarding the top line)
-	mov rdi, MEMORY_SCREEN_PADDR						; Load the videomem addr
-	mov rsi, MEMORY_SCREEN_PADDR + (2 * SCREEN_WIDTH)	; Address of 2nd line
+	mov rdi, HYDROGEN_MEMORY_SCREEN_PADDR						; Load the videomem addr
+	mov rsi, HYDROGEN_MEMORY_SCREEN_PADDR + (2 * SCREEN_WIDTH)	; Address of 2nd line
 	mov rcx, SCREEN_SIZE - SCREEN_WIDTH
 
 .move:

@@ -126,3 +126,54 @@ wait_busy:
 	jne .next
 	pop rcx
 	ret
+
+;-------------------------------------------------------------------------------
+; Utility - Instruction Sequences
+;-------------------------------------------------------------------------------
+
+; Exchanges two values in memory (not thread safe).
+;
+; Parameters:
+;	%1 Address or register with address for the first value.
+;	%2 Address of register with address for the second value.
+;	%3 Size of the value (byte/word/dword/qword)
+;
+; Example:
+;	xchg_mem 0x1000, rsi, qword
+%macro xchg_mem	3
+	push rax
+	push %3 [%1]
+	mov rax, %3 [%2]
+	mov %3 [%1], rax
+	pop %3 [%2]
+	pop rax
+%endmacro
+
+; Aligns a register to a 4kB page boundary.
+;
+; Parameters:
+;	%1 Name of the register to align
+;
+; Example:
+; 	align_page rdi
+%macro align_page 1
+	add %1, 0xFFF			; Add 0x1000-1, for all but for aligned addresses
+							; this will advance in the next page
+	and %1, ~0xFFF			; Now clear the lower 12 bits
+%endmacro
+
+; Macro for retrieving the address of a process descriptor for a processor
+; with a given id.
+;
+; Parameters:
+; 	%1 Register to load the address to.
+;	%2 APIC id of the processor or register containing the id.
+;
+; Examples:
+; 	info_proc_addr rdi, 0x2
+; 	info_proc_addr rsi, rax
+%macro info_proc_addr 2
+	mov %1, %2				; Load index into target register
+	shl %1, 2				; Multiply with four to get offset
+	add %1, info_proc		; Add list address
+%endmacro

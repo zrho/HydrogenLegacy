@@ -24,6 +24,7 @@
 %include "../inc/page.asm"
 %include "../inc/multiboot.asm"
 %include "../inc/lapic.asm"
+%include "../inc/pic.asm"
 
 ;-------------------------------------------------------------------------------
 ; Code

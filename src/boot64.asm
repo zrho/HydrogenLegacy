@@ -44,6 +44,7 @@ boot64_bsp:
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
 	call lapic_enable						; Enable the LAPIC
+	call pic_init							; Initializes the 8259 PIC
 	call smp_init							; Initialize SMP
 
 	; Initialize the kernel

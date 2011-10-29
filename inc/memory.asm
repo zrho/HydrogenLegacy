@@ -18,6 +18,7 @@
 ; Hydrogen API - Memory Layout
 ;-------------------------------------------------------------------------------
 
+%define HYDROGEN_MEMORY					0x100000
 %define HYDROGEN_MEMORY_INFO			HYDROGEN_MEMORY + 0x0
 %define HYDROGEN_MEMORY_INFO_PROC		HYDROGEN_MEMORY + 0x01000
 %define HYDROGEN_MEMORY_INFO_MODS		HYDROGEN_MEMORY + 0x02000

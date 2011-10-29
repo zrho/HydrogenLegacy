@@ -26,6 +26,8 @@ boot64_bsp:
 	; Prepare
 	cli										; Clear interrupts
 	and rsp, ~0xFFF							; Reset stack
+	mov ax, 0x10							; Load data segment selector
+	mov ds, ax
 
 	; Welcome message
 	call screen_clear
@@ -56,10 +58,11 @@ boot64_bsp:
 	jmp rax
 
 boot64_ap:
-	; Initialization
+	; Prepare
 	cli										; Clear interrupts
 	and rsp, ~0xFFF							; Reset stack
 
+	; Initialize
 	call int_load							; Load IDT
 	call lapic_enable						; Enable the LAPIC
 	call smp_init_ap						; Initialize SMP from AP side

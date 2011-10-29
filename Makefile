@@ -1,26 +1,55 @@
-ASM := nasm
-ASMFLAGS := -I./src/ -f elf64
+#-------------------------------------------------------------------------------
+# Definitions - Paths
+#-------------------------------------------------------------------------------
 
-BUILD_DIR := build
-SRC_DIR   := src
+BUILD_DIR		:= build
+BUILD_MAIN		:= $(BUILD_DIR)/hydrogen.o
+BUILD_LINKED	:= $(BUILD_DIR)/hydrogen.bin
 
-MAIN_S 	  := $(SRC_DIR)/hydrogen.asm
-MAIN_O	  := $(BUILD_DIR)/hydrogen.o
+SOURCE_DIR		:= src
+SOURCE_MAIN		:= $(SOURCE_DIR)/hydrogen.asm
+SOURCE_LINK		:= link.ld
 
+ISO				:= boot.iso
+ISO_DIR			:= iso
+ISO_ELTORITO	:= boot/stage2_eltorito
+ISO_HYDROGEN	:= boot/hydrogen.bin
+
+#-------------------------------------------------------------------------------
+# Definitions - Tools
+#-------------------------------------------------------------------------------
+
+ASM 			:= nasm
+ASM_FLAGS 		:= -I./src/ -f elf64
+
+EMU				:= bochs
+EMU_FLAGS		:= -q
+
+#-------------------------------------------------------------------------------
+# Targets
+#-------------------------------------------------------------------------------
+
+# Builds all binaries
+.PHONY: all
 all:
-	$(ASM) $(ASMFLAGS) $(MAIN_S) -o $(MAIN_O)
+	mkdir -p $(BUILD_DIR)
+	$(ASM) $(ASM_FLAGS) $(SOURCE_MAIN) -o $(BUILD_MAIN)
 	
+# Links all binaries
 link: all
-	ld -z max-page-size=4096 -T link.ld -o build/hydrogen.bin build/hydrogen.o
-	objcopy -x build/hydrogen.bin build/hydrogen.bin
+	ld -z max-page-size=4096 -T $(SOURCE_LINK) -o $(BUILD_LINKED) $(BUILD_MAIN)
+	objcopy -x $(BUILD_LINKED) $(BUILD_LINKED)
 	
+# Cleans all binaries
 clean:
-	rm $(MAIN_O)
+	rm $(BUILD_LINKED) $(BUILD_MAIN) $(ISO)
 	
+# Creates an ISO image
 iso: link
-	cp build/hydrogen.bin iso/boot/hydrogen.bin
-	mkisofs -R -b boot/stage2_eltorito -no-emul-boot -boot-load-size 4 \
-	          -boot-info-table -o boot.iso iso
+	cp $(BUILD_LINKED) iso/$(ISO_HYDROGEN)
+	mkisofs -R -b $(ISO_ELTORITO) -no-emul-boot -boot-load-size 4 \
+	          -boot-info-table -o $(ISO) $(ISO_DIR)
 	          
+# Runs the ISO image in an emulator
 run: iso
-	bochs -q
+	$(EMU) $(EMU_FLAGS)

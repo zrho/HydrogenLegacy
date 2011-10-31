@@ -64,16 +64,20 @@ multiboot_mmap_parse:
 	; Store
 	push rax
 	push rcx
+	push rdx
 	push rsi
 	push rdi
 
-	; Write mmap length
-	mov byte [info_table.mmap_count], cl
+	; Keep track of entry count
+	xor rdx, rdx
 
 	; Load target address
 	mov rdi, info_mmap
 
 .next_entry:
+	; Increase entry counter
+	inc rdx
+
 	; Write begin address
 	mov rax, qword [rsi + multiboot_mmap_entry.addr]	; Load begin address
 	stosq												; Write begin address
@@ -108,9 +112,13 @@ multiboot_mmap_parse:
 	cmp rcx, 0									; New entry available?
 	jne .next_entry
 
+	; Write entry count
+	mov byte [info_table.mmap_count], dl
+
 	; Restore
 	pop rdi
 	pop rsi
+	pop rdx
 	pop rcx
 	pop rax
 	ret

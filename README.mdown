@@ -16,7 +16,7 @@ iso9660 and multiboot or any other compatible boot loader.
 Features
 ----------------------
 
-  - Multiprocessor Support: Hydrogen parses the system's ACPI tables to discover
+  - Symmetric Multiprocessing: Hydrogen parses the system's ACPI tables to discover
     installed and enabled processors, boots them into long mode and leaves them
     in a halted state.
   - Multiboot Compatibility: Hydrogen is compatible with multiboot 1 bootloaders
@@ -29,6 +29,9 @@ Features
     processors, modules).
   - Clean Memory Layout: Hydrogen leaves the memory in a well defined state. No
     need to make assumptions about memory layout anymore.
+  - Legacy Initialization: Hydrogen initializes components like the 8259 PIC and
+    sets them to a default state that requires no further setup when the
+    component is not used or only little in the case it is.
 
 Build Requirements
 ----------------------
@@ -48,13 +51,28 @@ Limitations
 Currenty Hydrogen identity maps the first 64GB of physical memory using 2MB
 pages. Behaviour on systems with more than 64GB of memory installed is undefined.
 
+Also, Hydrogen only supports loading of flat binary kernels smaller than 2MB;
+the binary must begin on its entry point.
+
 How To Use
 ----------------------
 Hydrogen searches for a multiboot module with the cmdline string 'kernel64',
 maps it to the higher half address 0xFFFFFF0000000000 and onwards (maximum size:
-2 MB) and jumps to that address afterwards, so be sure your flat kernel binary
-begins with its entry point. Loading of more sophisticated type of binaries,
-like ELF64 may be implemented in the future.
+2 MB) and jumps to that address afterwards, so be sure your *flat* kernel binary
+begins with its entry point (Loading of more sophisticated type of binaries,
+like ELF64 may be implemented in the future).
+
+The loader will leave all important info tables and system structures (like
+paging tables) in physical memory, beginning at 0x100000 (1MB mark); see
+inc/memory.asm for details. This memory region is followed by the code and data
+of the loader (which could be disposed in theory) and the modules. The
+*free_mem_begin* field in the main info table (see inc/info.asm for the structure)
+points to the end of the last module, i.e. the first address that can be written
+to without the risk to override required data.
+
+When the PIC flag is set in the flags field of the info table, the loader has
+detected and initialized an 8259 PIC. Its first IRQ vector is set to 0x30 and
+all IRQs are masked.
 
 Related Work
 ----------------------

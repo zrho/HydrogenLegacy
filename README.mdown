@@ -62,13 +62,12 @@ maps it to the higher half address 0xFFFFFF0000000000 and onwards (maximum size:
 begins with its entry point (Loading of more sophisticated type of binaries,
 like ELF64 may be implemented in the future).
 
-The loader will leave all important info tables and system structures (like
-paging tables) in physical memory, beginning at 0x100000 (1MB mark); see
-inc/memory.asm for details. This memory region is followed by the code and data
-of the loader (which could be disposed in theory) and the modules. The
-*free_mem_begin* field in the main info table (see inc/info.asm for the structure)
-points to the end of the last module, i.e. the first address that can be written
-to without the risk to override required data.
+Hydrogen is loaded at 0x100000 (the 1MB mark) and reserves 16kB of memory for
+code and data, which can be reclaimed by the kernel with no risk. Behind that,
+i.e. to 0x104000, all info tables and system structures (like GDT, IDT and paging
+structures) are placed (see inc/memory.h and inc/info.h for more details), followed
+by the loaded modules. The free_mem_begin field of the main info table points to
+the address after the last module.
 
 When the PIC flag is set in the flags field of the info table, the loader has
 detected and initialized an 8259 PIC. Its first IRQ vector is set to 0x30 and

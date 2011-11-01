@@ -14,12 +14,12 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-section .text
-bits 32
-
 ;-----------------------------------------------------------------------
 ; Multiboot Header
 ;-----------------------------------------------------------------------
+section .multiboot
+bits 32
+
 MULTIBOOT_FLAG_PAGE_ALIGN	EQU 0x0001
 MULTIBOOT_FLAG_MEMORY_INFO	EQU	0x0002
 MULTIBOOT_FLAG_VIDEO_MODE	EQU	0x0004
@@ -41,6 +41,7 @@ multiboot_header:
 ;-------------------------------------------------------------------------------
 ; Bootstrap (Protected Mode)
 ;-------------------------------------------------------------------------------
+section .text
 
 ; Entry point for both the BSP and the APs.
 ;

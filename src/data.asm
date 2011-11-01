@@ -67,7 +67,12 @@ kernel_module: dq 0x0
 
 message_header:
 	db "Hydrogen v0.1b - http://github.com/farok/Hydrogen", CHAR_NL
-	db "Copyright (c) 2011 by Lukas Heidemann", CHAR_NL, 0
+	db "Copyright (c) 2011 by Lukas Heidemann", CHAR_NL
+	db "-------------------------------------------------", CHAR_NL
+	db "Initializing the system...", CHAR_NL, 0
+
+message_ap_started:
+	db "Application Processor started.", CHAR_NL, 0
 
 message_no_kernel:
 	db "PANIC: No kernel binary could be found. Make sure to pass "

@@ -82,6 +82,12 @@ smp_init:
 	cmp rax, 0
 	je .wait_for_ready
 
+	; Print message
+	push rsi					; Save rsi
+	mov rsi, message_ap_started
+	call screen_write
+	pop rsi
+
 .proc_next:
 	; Next processor available?
 	add rsi, 4				; Advance to next processor structure

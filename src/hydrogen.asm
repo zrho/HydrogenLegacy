@@ -29,17 +29,22 @@
 ;-------------------------------------------------------------------------------
 ; Code
 ;-------------------------------------------------------------------------------
-%include "boot32.asm"
 %include "util.asm"
-%include "boot16.asm"
-%include "boot64.asm"
-%include "multiboot.asm"
-%include "modules.asm"
-%include "interrupts.asm"
+
+%include "boot/boot16.asm"
+%include "boot/boot32.asm"
+%include "boot/boot64.asm"
+
+%include "info/multiboot.asm"
+%include "info/acpi.asm"
+
+%include "memory/modules.asm"
+%include "memory/kernel.asm"
+
+%include "interrupts/interrupts.asm"
+
 %include "screen.asm"
-%include "acpi.asm"
 %include "smp.asm"
-%include "kernel.asm"
 
 ;-------------------------------------------------------------------------------
 ; Data and BSS

@@ -40,9 +40,9 @@ ioapic_init_all:
 	; Get address of I/O APIC
 	mov esi, dword [rsi + hydrogen_info_ioapic.address]
 
-	; Inspect and mask all redirections
+	; Inspect and initialize redirections
 	call ioapic_inspect
-	call ioapic_mask_all
+	call ioapic_init_entries
 
 .next:
 	; Next?
@@ -58,32 +58,138 @@ ioapic_init_all:
 	pop rcx
 	ret
 
-; Masks all redirections for a given I/O APIC.
+; Initializes an I/O APIC's redirections.
 ;
 ; Parameters:
 ;	rsi The address of the I/O APIC.
 ;	rdi The address of the I/O APIC's entry in the info table.
-ioapic_mask_all:
+ioapic_init_entries:
 	; Store
 	push rax
 	push rcx
 
-	; Mask all redirections
+	; Initialize all entries
 	mov cl, byte [rdi + hydrogen_info_ioapic.int_count]
 
 .mask:
-	call ioapic_entry_read
-	or rax, IOAPIC_REDIR_MASK
-	call ioapic_entry_write
+	dec rcx
+	call ioapic_init_entry
 
 .mask_next:
-	dec rcx
 	cmp rcx, 0
 	jne .mask
 
 	; Restore
 	pop rcx
 	pop rax
+	ret
+
+; Initializes a given redirection entry.
+;
+; Standard Fields:
+; 	Vector: 0
+; 	Delivery Mode: Fixed
+; 	Destination Mode: Physical
+; 	Pin Polarity: Low Active
+; 	Trigger Mode: Edge
+; 	Mask: Masked
+; 	Destination: Current processor's (BSP) id
+;
+; Sets the vector for IRQ entries.
+;
+; Parameters:
+; 	rsi The address of the I/O APIC.
+; 	rdi The address of the I/O APIC's entry in the info table.
+; 	rcx The index of the redirection entry to initialize.
+ioapic_init_entry:
+	; Store
+	push rax
+	push rbx
+	push rdx
+
+	; Standard fields
+	mov rax,	(LAPIC_DELIVERY_FIXED << IOAPIC_REDIR_DELMOD_OFFSET) | \
+	         	(LAPIC_MODE_PHYSICAL << IOAPIC_REDIR_DESTMOD_OFFSET) | \
+				(IOAPIC_REDIR_INTPOL_LOW << IOAPIC_REDIR_INTPOL_OFFSET) | \
+				(LAPIC_TRIGGER_EDGE << IOAPIC_REDIR_TRIGGER_OFFSET) | \
+				(1 << IOAPIC_REDIR_MASK_OFFSET)
+
+	; Get BSP APIC id
+	xchg rax, rbx
+	call smp_id
+	shl rax, IOAPIC_REDIR_DEST_OFFSET
+	or rbx, rax
+	mov rdx, rbx				; Store entry value in rdx
+
+	; Calculate global system interrupt number (index + int_base)
+	mov ebx, dword [rdi + hydrogen_info_ioapic.int_base]
+	add rbx, rcx
+
+	; Check if ISA IRQ
+	xchg rbx, rcx				; GSI number in rcx
+	call ioapic_gsi_to_irq
+	xchg rbx, rcx				; Restore
+
+	cmp rax, ~0
+	jne .irq
+
+.irq:
+	; Set vector (IRQ number + IOAPIC_IRQ_VECTOR)
+	add rax, IOAPIC_IRQ_VECTOR
+	or rdx, rax
+
+.no_irq:
+	; Write entry
+	mov rax, rdx
+	call ioapic_entry_write
+
+	; Restore
+	pop rdx
+	pop rbx
+	pop rax
+	ret
+
+; Checks whether an global system interrupt maps to an ISA IRQ and returns
+; the IRQ number, if it does.
+;
+; Parameters:
+;	rcx The number of the global system interrupt to check.
+;
+; Returns:
+;	rax The number of the IRQ, or ~0 if the GSI does not map to an IRQ.
+ioapic_gsi_to_irq:
+	; Store
+	push rbx
+	push rsi
+
+	; Check IRQ to GSI mapping, if it contains the GSI
+	xor rbx, rbx							; Current IRQ
+	mov rsi, info_table.irq_to_gsi			; IRQ to GSI table
+
+.check:
+	lodsd			; Load entry
+	cmp rax, rcx	; GSI numbers match?
+	je .irq
+
+	; Next
+	inc rbx
+	cmp rbx, 16
+	jl .check
+	jmp .no_irq
+
+.irq:
+	; Return IRQ number
+	mov rax, rbx
+	jmp .end
+
+.no_irq:
+	; Is no IRQ, return ~0
+	mov rax, ~0
+
+.end:
+	; Restore
+	pop rsi
+	pop rbx
 	ret
 
 ; Inspects an I/O further to extract more information than it could be found

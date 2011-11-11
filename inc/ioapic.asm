@@ -19,7 +19,7 @@
 ;-------------------------------------------------------------------------------
 
 ; The first vector to program the ISA IRQs to.
-%define IOAPIC_ISA_IRQ_VECTOR			0x30
+%define IOAPIC_IRQ_VECTOR			0x30
 
 ;-------------------------------------------------------------------------------
 ; I/O APIC - Registers
@@ -53,9 +53,13 @@ endstruc
 %define IOAPIC_REDIR_DEST_OFFSET		56
 %define IOAPIC_REDIR_DEST_MASK			0xFF
 
-%define IOAPIC_REDIR_DESTMOD			(1 << 11)
-%define IOAPIC_REDIR_DELIVS				(1 << 12)
-%define IOAPIC_REDIR_INTPOL				(1 << 13)
-%define IOAPIC_REDIR_RIRR				(1 << 14)
-%define IOAPIC_REDIR_TRIGGER			(1 << 15)
-%define IOAPIC_REDIR_MASK				(1 << 16)
+%define IOAPIC_REDIR_DESTMOD_OFFSET		11
+%define IOAPIC_REDIR_DELIVS_OFFSET		12
+
+%define IOAPIC_REDIR_INTPOL_OFFSET		13
+%define IOAPIC_REDIR_INTPOL_LOW			1
+%define IOAPIC_REDIR_INTPOL_HIGH		0
+
+%define IOAPIC_REDIR_RIRR_OFFSET		14
+%define IOAPIC_REDIR_TRIGGER_OFFSET		15
+%define IOAPIC_REDIR_MASK_OFFSET		16

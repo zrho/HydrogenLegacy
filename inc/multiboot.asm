@@ -69,6 +69,7 @@ struc multiboot_info
 	.vbe_interface_seg:		RESB 4
 	.vbe_interface_off:		RESB 2
 	.vbe_interface_len:		RESB 2
+	.end:
 endstruc
 
 %define MULTIBOOT_MMAP_ENTRY_AVL 1
@@ -78,6 +79,7 @@ struc multiboot_mmap_entry
 	.addr:					RESB 8
 	.len:					RESB 8
 	.type:					RESB 4
+	.end:
 endstruc
 
 struc multiboot_mod_list
@@ -85,4 +87,5 @@ struc multiboot_mod_list
 	.mod_end:				RESB 4
 	.cmdline:				RESB 4
 	.pad:					RESB 4
+	.end:
 endstruc

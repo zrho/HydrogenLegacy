@@ -179,7 +179,7 @@ multiboot_mods_parse:
 	stosq								; Write stored rax to descriptor
 
 	; Next module?
-	add rsi, 16						; Add size of 16 bytes
+	add rsi, multiboot_mod_list.end	; Add size
 	dec rcx							; Decrease remaining module count
 	cmp	rcx, 0						; No module left?
 	jne .next_entry

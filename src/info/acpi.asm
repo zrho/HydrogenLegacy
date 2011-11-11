@@ -220,8 +220,8 @@ acpi_madt_parse:
 	cmp al, ACPI_MADT_DEV_LAPIC				; LAPIC?
 	je .dev_lapic							; Handle LAPIC
 
-;	cmp al, ACPI_MADT_DEV_IOAPIC			; I/O APIC?
-;	je .dev_ioapic							; Handle I/O APIC
+	cmp al, ACPI_MADT_DEV_IOAPIC			; I/O APIC?
+	je .dev_ioapic							; Handle I/O APIC
 
 	jmp .dev_handled						; Unknown device
 
@@ -229,9 +229,9 @@ acpi_madt_parse:
 	call acpi_madt_lapic_parse				; Parse LAPIC
 	jmp .dev_handled						; Device handled
 
-;.dev_ioapic:
-;	call acpi_madt_ioapic_parse				; Parse I/O APIC
-;	jmp .dev_handled						; Device handled
+.dev_ioapic:
+	call acpi_madt_ioapic_parse				; Parse I/O APIC
+	jmp .dev_handled						; Device handled
 
 .dev_handled:
 	; Device left?
@@ -292,6 +292,39 @@ acpi_madt_lapic_parse:
 	pop rdi
 	pop rsi
 	pop rdx
+	pop rbx
+	pop rax
+	ret
+
+; Parses an I/O APIC entry and adds it to the info table.
+;
+; Parameters:
+; 	rsi The address of the I/O APIC entry.
+acpi_madt_ioapic_parse:
+	; Restore
+	push rax
+	push rbx
+	push rcx
+	push rdi
+
+	; Load data
+	mov al, byte [rsi + acpi_madt_ioapic.ioapic_id]		; Load id
+	mov ebx, dword [rsi + acpi_madt_ioapic.ioapic_addr]	; Load address
+	mov ecx, dword [rsi + acpi_madt_ioapic.int_base]	; Load interrupt base
+
+	; Write entry to info table
+	mov rdi, qword [info_ioapic_next]
+	mov byte [rdi + hydrogen_info_ioapic.id], al
+	mov dword [rdi + hydrogen_info_ioapic.address], ebx
+	mov dword [rdi + hydrogen_info_ioapic.int_base], ecx
+
+	; Next entry in ioapic table
+	add qword [info_ioapic_next], hydrogen_info_ioapic.end
+	inc byte [info_table.ioapic_count]
+
+	; Restore
+	pop rdi
+	pop rcx
 	pop rbx
 	pop rax
 	ret

@@ -102,7 +102,7 @@ endstruc
 
 ; MADT entry describing a processor and it's LAPIC.
 ;
-; .type			Type if the device (ACPI_MADT_DEV_LAPIC).
+; .type			Type of the device (ACPI_MADT_DEV_LAPIC).
 ; .length		Length of the entry (8).
 ; .acpi_id		The ACPI id of the processor.
 ; .apic_id		The APIC id of the processor.
@@ -115,11 +115,18 @@ struc acpi_madt_lapic
 	.flags					RESB	4
 endstruc
 
+; MADT entry describing an I/O APIC.
+;
+; .type 		Type of the device (ACPI_MADT_DEV_IOAPIC)
+; .length		Length of the entry (12)
+; .ioapic_id	The id of the I/O APIC.
+; .ioapic_addr	The memory address of the I/O APIC's memory-mapped registers.
+; .int_base		Global System Interrupt number where the interrupt inputs start.
 struc acpi_madt_ioapic
 	.type					RESB	1
 	.length					RESB	1
 	.ioapic_id				RESB	1
 	.reserved				RESB	1
 	.ioapic_addr			RESB	4
-	.global_sys_int_base	RESB	4
+	.int_base				RESB	4
 endstruc

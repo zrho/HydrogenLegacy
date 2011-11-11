@@ -23,18 +23,13 @@ bits 64
 
 ; The info table to be passed to the kernel.
 info_table:
-	.free_mem_begin:	resb 8
-	.command_line:		resb 8
-	.lapic_paddr:		resb 8
-	.flags:				resb 1
-	.proc_count:		resb 1
-	.mod_count:			resb 1
-	.mmap_count:		resb 1
-	.reserved:			resb 4096 - 28
+	__hydrogen_info_table
+	resb 0x1000 - hydrogen_info_table.end
 
 info_proc:		resb 0x1000
 info_mods:		resb 0x1000
 info_mmap:		resb 0x1000
+info_ioapic:	resb 0x1000
 info_strings:	resb 0x1000
 
 ;-------------------------------------------------------------------------------

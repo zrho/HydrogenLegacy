@@ -31,7 +31,7 @@
 ; .proc_count		Length of processor list.
 ; .mod_count		Length of module list.
 ; .mmap_count		Length of memory map.
-struc hydrogen_info_table
+%macro __hydrogen_info_table 0
 	.free_mem_begin:	RESB 8
 	.command_line:		RESB 8
 	.lapic_paddr:		RESB 8
@@ -39,6 +39,12 @@ struc hydrogen_info_table
 	.proc_count:		RESB 1
 	.mod_count:			RESB 1
 	.mmap_count:		RESB 1
+	.ioapic_count:		RESB 1
+	.end:
+%endmacro
+
+struc hydrogen_info_table
+	__hydrogen_info_table
 endstruc
 
 ;-------------------------------------------------------------------------------
@@ -54,9 +60,27 @@ endstruc
 ; .acpi_id		The ACPI id of the processor.
 ; .apic_id		The APIC id of the processor.
 struc hydrogen_info_proc
-	.acpi_id					RESB	1
-	.apic_id					RESB	1
-	.flags						RESB	2
+	.acpi_id:					RESB	1
+	.apic_id:					RESB	1
+	.flags:						RESB	2
+	.end:
+endstruc
+
+;-------------------------------------------------------------------------------
+; Info Table - I/O APIC
+;-------------------------------------------------------------------------------
+
+; Info structure describing an I/O APIC.
+;
+; .id		The id of the I/O APIC.
+; .address	The address of the I/O APIC's memory mapped registers.
+; .int_base
+struc hydrogen_info_ioapic
+	.id:						RESB	1
+	.address:					RESB	4
+	.int_base:					RESB 	4
+	.int_count:					RESB 	1	; TODO: Determine this (max redir)
+	.end:
 endstruc
 
 ;-------------------------------------------------------------------------------
@@ -72,6 +96,7 @@ struc hydrogen_info_mod
 	.begin						RESB	8
 	.length						RESB 	8
 	.cmdline					RESB	8
+	.end:
 endstruc
 
 ;-------------------------------------------------------------------------------
@@ -87,4 +112,5 @@ struc hydrogen_info_mmap
 	.begin						RESB	8
 	.length						RESB	8
 	.available					RESB	1
+	.end:
 endstruc

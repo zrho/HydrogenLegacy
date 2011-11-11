@@ -76,11 +76,14 @@ endstruc
 ; Flag in the MADT, indicating the presence of a 8269 PIC in the system.
 %define ACPI_MADT_PCAT_COMPAT		(1 << 0)
 
-; Device id for LAPICs.
-%define ACPI_MADT_DEV_LAPIC			0
+; Type id for LAPICs.
+%define ACPI_MADT_TYPE_LAPIC		0
 
-; Device id for I/O APICs.
-%define ACPI_MADT_DEV_IOAPIC		1
+; Type id for I/O APICs.
+%define ACPI_MADT_TYPE_IOAPIC		1
+
+; Type id for interrupt source overrides (ISO)
+%define ACPI_MADT_TYPE_ISO			2
 
 ; The Multiple APIC Description Table contains information about the interrupt
 ; controllers installed into the system.
@@ -102,7 +105,7 @@ endstruc
 
 ; MADT entry describing a processor and it's LAPIC.
 ;
-; .type			Type of the device (ACPI_MADT_DEV_LAPIC).
+; .type			Type of the device (ACPI_MADT_TYPE_LAPIC).
 ; .length		Length of the entry (8).
 ; .acpi_id		The ACPI id of the processor.
 ; .apic_id		The APIC id of the processor.
@@ -117,7 +120,7 @@ endstruc
 
 ; MADT entry describing an I/O APIC.
 ;
-; .type 		Type of the device (ACPI_MADT_DEV_IOAPIC)
+; .type 		Type of the device (ACPI_MADT_TYPE_IOAPIC)
 ; .length		Length of the entry (12)
 ; .ioapic_id	The id of the I/O APIC.
 ; .ioapic_addr	The memory address of the I/O APIC's memory-mapped registers.
@@ -129,4 +132,21 @@ struc acpi_madt_ioapic
 	.reserved				RESB	1
 	.ioapic_addr			RESB	4
 	.int_base				RESB	4
+endstruc
+
+; MADT entry for interrupt source overrides.
+;
+; .type			Type of the entry (APCI_MADT_TYPE_ISO)
+; .length		Length of the entry (10)
+; .bus			Constant, meaning ISA (0)
+; .source		IRQ number
+; .gsi			Global system interrupt number.
+; .flags		Flags (same as INFO_IRQ_* values)
+struc acpi_madt_iso
+	.type					RESB 1
+	.length					RESB 1
+	.bus					RESB 1
+	.source					RESB 1
+	.gsi					RESB 4
+	.flags					RESB 2
 endstruc

@@ -21,6 +21,22 @@
 ; Flag indicating the presence of a 8259 PIC
 %define INFO_FLAG_PIC (1 << 0)
 
+; Constants specifying an ISA IRQ's polarity (in its flags)
+%define INFO_IRQ_POLARITY_OFFSET	0
+%define INFO_IRQ_POLARITY_MASK		11b
+
+%define INFO_IRQ_POLARITY_DEFAULT	00b
+%define INFO_IRQ_POLARITY_LOW		11b
+%define INFO_IRQ_POLARITY_HIGH		01b
+
+; Constants specifying an ISA IRQ's trigger mode (in its flags)
+%define INFO_IRQ_TRIGGER_OFFSET		2
+%define INFO_IRQ_TRIGGER_MASK		11b
+
+%define INFO_IRQ_TRIGGER_DEFAULT	00b
+%define INFO_IRQ_TRIGGER_EDGE		01b
+%define INFO_IRQ_TRIGGER_LEVEL		11b
+
 ; Main info structure containing important information about the system.
 ;
 ; .free_mem_begin	Beginning of the memory area, where it is free to write to
@@ -28,9 +44,12 @@
 ; .command_line		The command line string with which the kernel has been loaded.
 ; .lapic_paddr		The physical address of the LAPIC.
 ; .flags			The system's flags.
-; .proc_count		Length of processor list.
-; .mod_count		Length of module list.
-; .mmap_count		Length of memory map.
+; .proc_count		Number of processors.
+; .mod_count		Number of modules.
+; .mmap_count		Number of memory map entries.
+; .ioapic_count		Number of I/O APICs.
+; .irq_to_gsi		ISA IRQ to global system interrupt mappings.
+; .irq_flags		Flags for handling the ISA IRQs (one entry for each).
 %macro __hydrogen_info_table 0
 	.free_mem_begin:	RESB 8
 	.command_line:		RESB 8
@@ -40,6 +59,8 @@
 	.mod_count:			RESB 1
 	.mmap_count:		RESB 1
 	.ioapic_count:		RESB 1
+	.irq_to_gsi:		RESB 4 * 16
+	.irq_flags:			RESB 1 * 16
 	.end:
 %endmacro
 

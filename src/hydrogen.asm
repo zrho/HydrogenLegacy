@@ -25,6 +25,7 @@
 %include "../inc/multiboot.asm"
 %include "../inc/lapic.asm"
 %include "../inc/pic.asm"
+%include "../inc/ioapic.asm"
 
 ;-------------------------------------------------------------------------------
 ; Code
@@ -37,12 +38,14 @@
 
 %include "info/multiboot.asm"
 %include "info/acpi.asm"
+%include "info/info.asm"
 
 %include "memory/modules.asm"
 %include "memory/kernel.asm"
 
 %include "interrupts/idt.asm"
 %include "interrupts/lapic.asm"
+%include "interrupts/ioapic.asm"
 %include "interrupts/pic.asm"
 
 %include "screen.asm"

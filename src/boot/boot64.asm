@@ -34,17 +34,20 @@ boot64_bsp:
 	mov rsi, message_header
 	call screen_write
 
-	; Initialize the system
+	; Initialize the info tables
+	call info_prepare						; Prepare the info structure
 	call multiboot_parse					; Parse multiboot tables
 	call acpi_parse							; Parse ACPI tables
 
 	call modules_sort						; Sort the modules (for moving)
 	call modules_move						; Move modules to new location
 
+	; Initialize the system
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
 	call lapic_enable						; Enable the LAPIC
-	call pic_init							; Initializes the 8259 PIC
+	call pic_init							; Initialize the 8259 PIC
+	call ioapic_init_all					; Initialize all I/O APICs
 	call smp_init							; Initialize SMP
 
 	; Initialize the kernel

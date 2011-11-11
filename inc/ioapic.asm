@@ -15,6 +15,13 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;-------------------------------------------------------------------------------
+; I/O APIC - Vectors
+;-------------------------------------------------------------------------------
+
+; The first vector to program the ISA IRQs to.
+%define IOAPIC_ISA_IRQ_VECTOR			0x30
+
+;-------------------------------------------------------------------------------
 ; I/O APIC - Registers
 ;-------------------------------------------------------------------------------
 
@@ -32,3 +39,23 @@ endstruc
 %define IOAPIC_IOAPICVER_INDEX			0x01
 %define IOAPIC_IOAPICARB_INDEX			0x02
 %define IOAPIC_IOREDTBL_OFFSET			0x10
+
+;-------------------------------------------------------------------------------
+; I/O APIC - Redirection Table
+;-------------------------------------------------------------------------------
+
+%define IOAPIC_REDIR_VECTOR_OFFSET		0
+%define IOAPIC_REDIR_VECTOR_MASK		0xFF
+
+%define IOAPIC_REDIR_DELMOD_OFFSET		8
+%define IOAPIC_REDIR_DELMOD_MASK		111b
+
+%define IOAPIC_REDIR_DEST_OFFSET		56
+%define IOAPIC_REDIR_DEST_MASK			0xFF
+
+%define IOAPIC_REDIR_DESTMOD			(1 << 11)
+%define IOAPIC_REDIR_DELIVS				(1 << 12)
+%define IOAPIC_REDIR_INTPOL				(1 << 13)
+%define IOAPIC_REDIR_RIRR				(1 << 14)
+%define IOAPIC_REDIR_TRIGGER			(1 << 15)
+%define IOAPIC_REDIR_MASK				(1 << 16)

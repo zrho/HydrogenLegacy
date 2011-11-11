@@ -217,11 +217,14 @@ acpi_madt_parse:
 	; Identify device
 	mov al, byte [rsi]						; Get device type
 
-	cmp al, ACPI_MADT_DEV_LAPIC				; LAPIC?
+	cmp al, ACPI_MADT_TYPE_LAPIC			; LAPIC?
 	je .dev_lapic							; Handle LAPIC
 
-	cmp al, ACPI_MADT_DEV_IOAPIC			; I/O APIC?
+	cmp al, ACPI_MADT_TYPE_IOAPIC			; I/O APIC?
 	je .dev_ioapic							; Handle I/O APIC
+
+	cmp al, ACPI_MADT_TYPE_ISO				; ISO?
+	je .dev_iso								; Handle ISO
 
 	jmp .dev_handled						; Unknown device
 
@@ -231,6 +234,10 @@ acpi_madt_parse:
 
 .dev_ioapic:
 	call acpi_madt_ioapic_parse				; Parse I/O APIC
+	jmp .dev_handled						; Device handled
+
+.dev_iso:
+	call acpi_madt_iso_parse				; Parse ISO
 	jmp .dev_handled						; Device handled
 
 .dev_handled:
@@ -324,6 +331,39 @@ acpi_madt_ioapic_parse:
 
 	; Restore
 	pop rdi
+	pop rcx
+	pop rbx
+	pop rax
+	ret
+
+; Parses an interrupt source override entry and adjusts the IRQ to GSI mapping
+; in the info table.
+;
+; Parameters:
+; 	rsi The address of the ISO entry.
+acpi_madt_iso_parse:
+	; Store
+	push rax
+	push rbx
+	push rcx
+
+	; Load data
+	mov al, byte [rsi + acpi_madt_iso.source]	; Load IRQ number
+	mov ebx, dword [rsi + acpi_madt_iso.gsi]	; Load GSI number
+	mov cx, word [rsi + acpi_madt_iso.flags]	; Load flags
+
+	; Store flags in info table
+	mov rdi, info_table.irq_flags
+	add rdi, rax
+	mov byte [rdi], cl
+
+	; Adjust IRQ to GSI mapping in info table
+	mov rdi, info_table.irq_to_gsi
+	shl rax, 2									; 4 * IRQ: offset in map
+	add rdi, rax
+	mov dword [rdi], ebx
+
+	; Restore
 	pop rcx
 	pop rbx
 	pop rax

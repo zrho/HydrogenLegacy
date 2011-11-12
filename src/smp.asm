@@ -67,11 +67,18 @@ smp_init:
 	cmp rbx, 0
 	jne .proc_next
 
-	; Send init and startup IPI
+	; Send init IPI
 	xor rax, rax
 	mov al, byte [rsi + hydrogen_info_proc.apic_id]
 	call lapic_ipi_init
-	call wait_busy				; Busy wait for a short moment
+
+	; Wait for a moment
+	push rcx
+	mov rcx, 5			; 5 ticks should suffice
+	call wait_ticks
+	pop rcx
+
+	; Send startup IPI
 	call lapic_ipi_startup
 
 	; Wait for processor to become ready

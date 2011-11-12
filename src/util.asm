@@ -117,14 +117,27 @@ memory_copy:
 	pop rax
 	ret
 
-wait_busy:
+; Waits a given number of ticks of the PIT.
+;
+; Parameters:
+; 	rcx Number of ticks to wait.
+wait_ticks:
+	; Store
+	push rax
 	push rcx
-	mov rcx, 2000
-.next:
-	dec rcx
-	cmp rcx, 0
-	jne .next
+
+	; Get number of ticks after wait is completed
+	add rcx, qword [ticks]
+
+	; Spin on number of ticks
+.spin:
+	mov rax, qword [ticks]
+	cmp rax, rcx
+	jl .spin
+
+	; Restore
 	pop rcx
+	pop rax
 	ret
 
 ;-------------------------------------------------------------------------------

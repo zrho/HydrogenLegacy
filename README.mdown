@@ -14,8 +14,8 @@ This binary can easily be replaced by any other compilation of GRUB2 that suppor
 iso9660 and multiboot or any other compatible boot loader.
 
 Also ships with example kernels (grouped by primary language) in examples/. Build
-them using *make all* in their respective directory, copy the resulting kernel.bin
-to iso/boot/ and run *make run*.
+them using *make install* in their respective directory (copies the kernel.bin to
+iso/boot/) and run *make run* in the main directory.
 
 Features
 ----------------------

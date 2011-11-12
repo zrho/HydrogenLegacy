@@ -13,7 +13,12 @@ LD_FILE					:= link.ld
 BUILD_BIN				:= kernel.bin
 BUILD_OBJ				:= boot.o main.o
 
+TARGET_ISO				:= ../../iso/boot/
+
 # Targets
+install: all
+	cp $(BUILD_BIN) $(TARGET_ISO)
+
 all: build link
 
 link:

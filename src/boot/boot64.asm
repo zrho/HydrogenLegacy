@@ -60,6 +60,9 @@ boot64_bsp:
 
 	call smp_init							; Initialize SMP
 
+	cli										; Disable interrupt
+	call pit_disable						; Disable the PIT again (not used anymore)
+
 	; Initialize the kernel
 	call kernel_find						; Search for the kernel
 	call kernel_map							; Map the kernel

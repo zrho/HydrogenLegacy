@@ -121,6 +121,18 @@ pit_enable:
 	pop rcx
 	ret
 
+pit_disable:
+	; Store
+	push rcx
+
+	; Mask IRQ
+	mov cl, byte [pit_irq]
+	call irq_mask
+
+	; Restore
+	pop rcx
+	ret
+
 pit_tick:
 	inc qword [ticks]
 	call lapic_eoi

@@ -47,6 +47,7 @@ page_map:
 	; Store
 	push rax
 	push rbx
+	push rcx
 	push rsi
 	push rdi
 	push r8
@@ -77,6 +78,7 @@ page_map:
 	pop r8
 	pop rdi
 	pop rsi
+	pop rcx
 	pop rbx
 	pop rax
 	ret
@@ -143,7 +145,6 @@ page_create_and_set:
 
 .pte:
 	; Write PTE
-	xchg bx, bx
 	mov qword [rbx], rax
 	jmp .end
 

@@ -86,6 +86,13 @@ message_kernel:
 ; Misc
 ;-------------------------------------------------------------------------------
 
+; Number of ticks of the PIT
+ticks: dq 0x0
+
+; The IRQ number to use for the PIT
+pit_irq: db 0x0
+
+; Cursor positions for the screen
 screen:
 	.cursor_x: dw 0x0
 	.cursor_y: dw 0x0

@@ -18,8 +18,6 @@
 ; PIC - IO Constants
 ;-------------------------------------------------------------------------------
 
-%define PIC_VECTOR					0x30
-
 ; see http://http://wiki.osdev.org/PIC
 
 %define IO_PIC1                     0x20

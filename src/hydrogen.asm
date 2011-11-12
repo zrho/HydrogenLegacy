@@ -26,6 +26,9 @@
 %include "../inc/lapic.asm"
 %include "../inc/pic.asm"
 %include "../inc/ioapic.asm"
+%include "../inc/idt.asm"
+%include "../inc/irq.asm"
+%include "../inc/pit.asm"
 
 ;-------------------------------------------------------------------------------
 ; Code
@@ -47,6 +50,8 @@
 %include "interrupts/lapic.asm"
 %include "interrupts/ioapic.asm"
 %include "interrupts/pic.asm"
+%include "interrupts/irq.asm"
+%include "interrupts/pit.asm"
 
 %include "screen.asm"
 %include "smp.asm"

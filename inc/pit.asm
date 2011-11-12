@@ -14,30 +14,13 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-section .text
-bits 64
-
 ;-------------------------------------------------------------------------------
-; Info Table
+; PIT
 ;-------------------------------------------------------------------------------
 
-; Prepares the info table by writing default data.
-info_prepare:
-	; Store
-	push rax
-	push rdi
+%define PIT_FREQ				100  		; 10 ms, in Hz
+%define PIT_FREQ_BASE			1193180		; in Hz
 
-	; Write default IRQ to GSI mapping
-	xor rax, rax
-	mov rdi, info_table.irq_to_gsi
-
-.irq2gsi_next:
-	stosd
-	inc rax
-	cmp rax, IRQ_COUNT
-	jl .irq2gsi_next
-
-	; Restore
-	pop rdi
-	pop rax
-	ret
+%define PIT_IO_COMMAND			0x43
+%define PIT_IO_COMMAND_DIVIDER	0x36
+%define PIT_IO_DATA				0x40

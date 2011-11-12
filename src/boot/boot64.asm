@@ -26,8 +26,11 @@ boot64_bsp:
 	; Prepare
 	cli										; Clear interrupts
 	and rsp, ~0xFFF							; Reset stack
-	mov ax, 0x10							; Load data segment selector
+	mov ax, 0x10							; Load data segment selectors
 	mov ds, ax
+	mov gs, ax
+	mov fs, ax
+	mov ss, ax
 
 	; Welcome message
 	call screen_clear
@@ -45,9 +48,16 @@ boot64_bsp:
 	; Initialize the system
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
+
 	call lapic_enable						; Enable the LAPIC
 	call pic_init							; Initialize the 8259 PIC
-	call ioapic_init_all					; Initialize all I/O APICs
+	call ioapic_init						; Initialize all I/O APICs
+	call irq_wire							; Wire IRQs
+
+	call pit_init							; Initialize the PIT
+	call pit_enable							; Enable the PIT
+	sti										; Enable interrupts
+
 	call smp_init							; Initialize SMP
 
 	; Initialize the kernel

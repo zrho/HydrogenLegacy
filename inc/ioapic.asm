@@ -15,13 +15,6 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;-------------------------------------------------------------------------------
-; I/O APIC - Vectors
-;-------------------------------------------------------------------------------
-
-; The first vector to program the ISA IRQs to.
-%define IOAPIC_IRQ_VECTOR			0x30
-
-;-------------------------------------------------------------------------------
 ; I/O APIC - Registers
 ;-------------------------------------------------------------------------------
 
@@ -31,6 +24,7 @@
 ; .iowin	Window for manipulating the I/O APIC's internal registers.
 struc ioapic
 	.regsel:			RESB 4
+	.reserved:			RESB 0x10 - 4
 	.iowin:				RESB 4
 endstruc
 

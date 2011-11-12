@@ -14,30 +14,9 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-section .text
-bits 64
-
 ;-------------------------------------------------------------------------------
-; Info Table
+; IRQ
 ;-------------------------------------------------------------------------------
 
-; Prepares the info table by writing default data.
-info_prepare:
-	; Store
-	push rax
-	push rdi
-
-	; Write default IRQ to GSI mapping
-	xor rax, rax
-	mov rdi, info_table.irq_to_gsi
-
-.irq2gsi_next:
-	stosd
-	inc rax
-	cmp rax, IRQ_COUNT
-	jl .irq2gsi_next
-
-	; Restore
-	pop rdi
-	pop rax
-	ret
+%define IRQ_VECTOR	0x30
+%define IRQ_COUNT	16

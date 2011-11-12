@@ -18,11 +18,11 @@ section .text
 bits 64
 
 ;-------------------------------------------------------------------------------
-; Interrupts - I/O APIC
-;-------------------------------------------------------------------------------
+; Interrupts - I/O APIC - Initialization
+;------------------------------------------------------------------------------
 
 ; Initializes all I/O APICs.
-ioapic_init_all:
+ioapic_init:
 	; Store
 	push rcx
 	push rsi
@@ -38,10 +38,10 @@ ioapic_init_all:
 
 .handle:
 	; Get address of I/O APIC
-	mov esi, dword [rsi + hydrogen_info_ioapic.address]
+	mov esi, dword [rdi + hydrogen_info_ioapic.address]
 
 	; Inspect and initialize redirections
-	call ioapic_inspect
+	call ioapic_init_inspect
 	call ioapic_init_entries
 
 .next:
@@ -95,8 +95,6 @@ ioapic_init_entries:
 ; 	Mask: Masked
 ; 	Destination: Current processor's (BSP) id
 ;
-; Sets the vector for IRQ entries.
-;
 ; Parameters:
 ; 	rsi The address of the I/O APIC.
 ; 	rdi The address of the I/O APIC's entry in the info table.
@@ -105,7 +103,6 @@ ioapic_init_entry:
 	; Store
 	push rax
 	push rbx
-	push rdx
 
 	; Standard fields
 	mov rax,	(LAPIC_DELIVERY_FIXED << IOAPIC_REDIR_DELMOD_OFFSET) | \
@@ -118,78 +115,14 @@ ioapic_init_entry:
 	xchg rax, rbx
 	call smp_id
 	shl rax, IOAPIC_REDIR_DEST_OFFSET
-	or rbx, rax
-	mov rdx, rbx				; Store entry value in rdx
+	or rax, rbx
 
-	; Calculate global system interrupt number (index + int_base)
-	mov ebx, dword [rdi + hydrogen_info_ioapic.int_base]
-	add rbx, rcx
-
-	; Check if ISA IRQ
-	xchg rbx, rcx				; GSI number in rcx
-	call ioapic_gsi_to_irq
-	xchg rbx, rcx				; Restore
-
-	cmp rax, ~0
-	jne .irq
-
-.irq:
-	; Set vector (IRQ number + IOAPIC_IRQ_VECTOR)
-	add rax, IOAPIC_IRQ_VECTOR
-	or rdx, rax
-
-.no_irq:
 	; Write entry
-	mov rax, rdx
 	call ioapic_entry_write
 
 	; Restore
-	pop rdx
 	pop rbx
 	pop rax
-	ret
-
-; Checks whether an global system interrupt maps to an ISA IRQ and returns
-; the IRQ number, if it does.
-;
-; Parameters:
-;	rcx The number of the global system interrupt to check.
-;
-; Returns:
-;	rax The number of the IRQ, or ~0 if the GSI does not map to an IRQ.
-ioapic_gsi_to_irq:
-	; Store
-	push rbx
-	push rsi
-
-	; Check IRQ to GSI mapping, if it contains the GSI
-	xor rbx, rbx							; Current IRQ
-	mov rsi, info_table.irq_to_gsi			; IRQ to GSI table
-
-.check:
-	lodsd			; Load entry
-	cmp rax, rcx	; GSI numbers match?
-	je .irq
-
-	; Next
-	inc rbx
-	cmp rbx, 16
-	jl .check
-	jmp .no_irq
-
-.irq:
-	; Return IRQ number
-	mov rax, rbx
-	jmp .end
-
-.no_irq:
-	; Is no IRQ, return ~0
-	mov rax, ~0
-
-.end:
-	; Restore
-	pop rsi
-	pop rbx
 	ret
 
 ; Inspects an I/O further to extract more information than it could be found
@@ -200,7 +133,7 @@ ioapic_gsi_to_irq:
 ; Parameters:
 ;	rsi The address of the I/O APIC.
 ;	rdi The address of the I/O APIC's entry in the info table.
-ioapic_inspect:
+ioapic_init_inspect:
 	; Store
 	push rax
 	push rcx
@@ -208,8 +141,8 @@ ioapic_inspect:
 	; Extract max redirection and add one for int count
 	mov rcx, IOAPIC_IOAPICVER_INDEX		; Read IOAPICVER register
 	call ioapic_reg_read
-	shr rax, 23							; Extract bytes 23-26
-	and rax, 1111b
+	shr rax, 16							; Extract bytes 16-23
+	and rax, 0xFF
 	add rax, 1							; Add one to get interrupt count
 	mov byte [rdi + hydrogen_info_ioapic.int_count], al
 
@@ -218,31 +151,60 @@ ioapic_inspect:
 	pop rax
 	ret
 
-; Writes to an (internal) I/O APIC register.
-;
-; Parameters:
-;	eax The value to write.
-; 	ecx	The index of the register
-;	rsi The I/O APIC's base address.
-ioapic_reg_write:
-	mov dword [rsi + ioapic.regsel], ecx	; Write register selector
-	mov dword [rsi + ioapic.iowin], eax		; Write value
-	ret
+;-------------------------------------------------------------------------------
+; Interrupts - I/O APIC - Helper
+;------------------------------------------------------------------------------
 
-; Reads an (internal) I/O APIC register.
+; Searches for an entry with the given global system interrupt number.
 ;
 ; Parameters:
-;	ecx The index of the register.
-;	rsi The I/O APIC's base address.
+;	rcx The global system interrupt number of the entry.
 ;
 ; Returns:
-;	eax The value of the register.
-ioapic_reg_read:
-	mov dword [rsi + ioapic.regsel], ecx	; Write register selector
-	mov eax, dword [rsi + ioapic.iowin]
+;	rsi The I/O APIC's base address. 0 if not found.
+;	rdi The I/O APIC's info table entry address. 0 if not found.
+;	rcx The index of the entry. ~0 if not found.
+ioapic_entry_get:
+	; Store
+	push rax
+	push rbx
+
+	; Search the entries
+	mov bl, byte [info_table.ioapic_count]	; Counter
+	mov rdi, info_ioapic
+
+.handle:
+	; Get GSI base and interrupt count
+	mov eax, dword [rdi + hydrogen_info_ioapic.int_base]
+	mov bl, byte [rdi + hydrogen_info_ioapic.int_count]
+
+	; Check if in range
+	cmp rcx, rax
+	jl .next
+
+	add rbx, rax
+	cmp rcx, rbx
+	jge .next
+
+	; Handled by this APIC
+	sub rcx, rax				; Subtract GSI base to get index
+	mov esi, dword [rdi + hydrogen_info_ioapic.address]
+	jmp .end
+
+.next:
+	; Next?
+	add rdi, hydrogen_info_ioapic.end
+	dec rbx
+	cmp rbx, 0
+	jne .handle
+
+.end:
+	; Restore
+	pop rbx
+	pop rax
 	ret
 
-; Writes an entry in an I/O APIC's redirection table.
+	; Writes an entry in an I/O APIC's redirection table.
 ;
 ; Parameters:
 ;	rax The entry to write.
@@ -284,7 +246,7 @@ ioapic_entry_read:
 	push rcx
 
 	; Calculate index for lower DWORD
-	shr rcx, 1
+	shl rcx, 1							; *2
 	add rcx, IOAPIC_IOREDTBL_OFFSET
 
 	; Read lower DWORD
@@ -303,4 +265,28 @@ ioapic_entry_read:
 	; Restore
 	pop rcx
 	pop rbx
+	ret
+
+; Writes to an (internal) I/O APIC register.
+;
+; Parameters:
+;	eax The value to write.
+; 	ecx	The index of the register
+;	rsi The I/O APIC's base address.
+ioapic_reg_write:
+	mov dword [rsi + ioapic.regsel], ecx	; Write register selector
+	mov dword [rsi + ioapic.iowin], eax		; Write value
+	ret
+
+; Reads an (internal) I/O APIC register.
+;
+; Parameters:
+;	ecx The index of the register.
+;	rsi The I/O APIC's base address.
+;
+; Returns:
+;	eax The value of the register.
+ioapic_reg_read:
+	mov dword [rsi + ioapic.regsel], ecx	; Write register selector
+	mov eax, dword [rsi + ioapic.iowin]
 	ret

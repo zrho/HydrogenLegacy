@@ -40,6 +40,22 @@ lapic_enable:
 	pop rax
 	ret
 
+; Signals the end of an interrupt for the current processor's LAPIC.
+lapic_eoi:
+	; Store
+	push rax
+	push rsi
+
+	; Write zero to EOI
+	mov rsi, qword [info_table.lapic_paddr]
+	add rsi, LAPIC_EOI_OFFSET
+	mov dword [rsi], 0
+
+	; Restore
+	pop rsi
+	pop rax
+	ret
+
 ; Sends an IPI using the current processor's LAPIC.
 ;
 ; Parameters:

@@ -51,11 +51,11 @@ pic_init:
 
 	; ICW2: Define PIC vectors
 	mov dx, IO_PIC1_DATA
-	mov al, PIC_VECTOR
+	mov al, IRQ_VECTOR
 	out dx, al
 
 	mov dx, IO_PIC2_DATA
-	mov al, PIC_VECTOR + 7
+	mov al, IRQ_VECTOR + 7
 	out dx, al
 
 	; ICW3: Continue init sequence

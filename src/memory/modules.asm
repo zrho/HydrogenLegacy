@@ -24,6 +24,8 @@ extern end
 
 ; Moves all the modules in the hydrogen info table to the memory after this
 ; binary.
+;
+; Sets free_mem_begin to the end of the last module (aligned on a page boundary).
 modules_move:
 	; Store
 	push rbx

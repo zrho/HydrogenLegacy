@@ -45,6 +45,7 @@
 
 %include "memory/modules.asm"
 %include "memory/kernel.asm"
+%include "memory/frame.asm"
 
 %include "interrupts/idt.asm"
 %include "interrupts/lapic.asm"

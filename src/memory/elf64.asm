@@ -132,8 +132,9 @@ elf64_load_segment:
 
 .copy_next:
 	; Copy byte
-	mov rax, qword [rbx]
-	mov qword [rdi], rax
+	xor rax, rax
+	mov al, byte [rbx]
+	mov byte [rdi], al
 
 	; Next?
 	inc rdi

@@ -30,6 +30,7 @@
 %include "../inc/irq.asm"
 %include "../inc/pit.asm"
 %include "../inc/elf64.asm"
+%include "../inc/config.asm"
 
 ;-------------------------------------------------------------------------------
 ; Code

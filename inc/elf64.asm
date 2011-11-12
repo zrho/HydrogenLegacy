@@ -48,6 +48,24 @@
 %define ELF_PF_W				(1 << 1)	; Writable
 %define ELF_PF_R				(1 << 2)	; Readable
 
+; Values for elf64_shdr.sh_type
+%define ELF_SHT_NULL			0			; inactive
+%define ELF_SHT_PROGBITS		1			; program defined information
+%define ELF_SHT_SYMTAB			2			; symbol table section
+%define ELF_SHT_STRTAB			3			; string table section
+%define ELF_SHT_RELA			4			; relocation section with addends
+%define ELF_SHT_HASH			5			; symbol hash table section
+%define ELF_SHT_DYNAMIC			6			; dynamic section
+%define ELF_SHT_NOTE			7			; note section
+%define ELF_SHT_NOBITS			8			; no space section
+%define ELF_SHT_REL				9			; relation section without addends
+%define ELF_SHT_SHLIB			10			; reserved - purpose unknown
+%define ELF_SHT_DYNSYM			11			; dynamic symbol table section
+%define ELF_SHT_LOPROC			0x70000000	; reserved range for processor
+%define ELF_SHT_HIPROC			0x7FFFFFFF	; specific section header types
+%define ELF_SHT_LOUSER			0x80000000	; reserved range for application
+%define ELF_SHT_HIUSER			0xFFFFFFFF	; specific indexes
+
 ; ELF64 file header.
 struc elf64_ehdr
 	.e_ident_mag:				RESB 4
@@ -88,5 +106,31 @@ struc elf64_phdr
 	.p_filesz:					RESB 8
 	.p_memsz:					RESB 8
 	.p_align:					RESB 8
+	.end:
+endstruc
+
+; ELF64 section header.
+struc elf64_shdr
+	.sh_name:					RESB 4
+	.sh_type:					RESB 4
+	.sh_flags:					RESB 8
+	.sh_addr:					RESB 8
+	.sh_offset:					RESB 8
+	.sh_size:					RESB 8
+	.sh_link:					RESB 4
+	.sh_info:					RESB 4
+	.sh_addralign:				RESB 8
+	.sh_entsize:				RESB 8
+	.end:
+endstruc
+
+; ELF64 symbol table entry.
+struc elf64_sym
+	.st_name:					RESB 4
+	.st_info:					RESB 1
+	.st_other:					RESB 1
+	.st_shndx:					RESB 2
+	.st_value:					RESB 8
+	.st_size:					RESB 8
 	.end:
 endstruc

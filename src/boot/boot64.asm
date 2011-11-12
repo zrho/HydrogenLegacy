@@ -66,6 +66,7 @@ boot64_bsp:
 	; Initialize the kernel
 	call kernel_find						; Search for the kernel
 	call kernel_load						; Load the kernel
+	call kernel_inspect						; Inspect the kernel binary
 
 	; Jump to the kernel
 	mov rsi, message_kernel

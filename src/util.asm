@@ -81,6 +81,100 @@ string_copy:
 	pop rax
 	ret
 
+; Checks whether two strings are equal.
+;
+; Parameters:
+;	rsi The address of the first string.
+; 	rdi The address of the second string.
+;
+; Returns:
+;	rax 1 if the strings are equal, 0 otherwise.
+string_equal:
+	; Store
+	push rbx
+	push rsi
+	push rdi
+
+	; Get length for both strings
+	call string_length					; First string
+
+	xchg rsi, rdi
+	xchg rax, rbx
+	call string_length					; Second string
+
+	; Equal length?
+	cmp rax, rbx
+	jne .not_equal
+
+	; Compare
+	mov rcx, rax
+	call memory_equal
+	jmp .end
+
+.not_equal:
+	; Return 0
+	xor rax, rax
+
+.end:
+	; Restore
+	pop rdi
+	pop rsi
+	pop rbx
+	ret
+
+; Compares two regions of memory and returns whether they are equal.
+;
+; Parameters:
+;	rsi The address of the first region of memory.
+;	rdi The address of the second region of memory.
+;	rcx The length of the regions.
+;
+; Returns:
+;	rax 1 if they are equal, 0 otherwise.
+memory_equal:
+	; Store
+	push rbx
+	push rcx
+	push rsi
+	push rdi
+
+	; Compare byte-wise
+.next_byte:
+	; Byte left?
+	cmp rcx, 0
+	je .equal
+
+	; Compare byte
+	xor rax, rax
+	xor rbx, rbx
+	mov al, byte [rsi]
+	mov bl, byte [rdi]
+	cmp rax, rbx
+	jne .not_equal
+
+	; Next
+	dec rcx
+	inc rsi
+	inc rdi
+	jmp .next_byte
+
+.equal:
+	; Return 1
+	mov rax, 1
+	jmp .end
+
+.not_equal:
+	; Return 0
+	xor rax, rax
+
+.end:
+	; Restore
+	pop rdi
+	pop rsi
+	pop rcx
+	pop rbx
+	ret
+
 ; Copies rcx bytes from rsi to rdi.
 ;
 ; Parameters:

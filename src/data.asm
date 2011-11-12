@@ -65,6 +65,12 @@ kernel_module: dq 0x0
 ; The address of the kernel entry point
 kernel_entry: dq 0x0
 
+; The address of the string table in the kernel binary
+kernel_string_table: dq 0x0
+
+; Name of the symbol of the config table
+kernel_symbol_config: dq "hydrogen_config", 0
+
 ;-------------------------------------------------------------------------------
 ; Messages
 ;-------------------------------------------------------------------------------

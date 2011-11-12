@@ -163,6 +163,62 @@ elf64_load_segment:
 	pop rax
 	ret
 
+; Iterates through the sections of an ELF64 file and calls a callback for
+; every section of a given type.
+;
+; Callback Parameters:
+; 	rdx	The address of the binary.
+;	rsi The address of the section header.
+;
+; Parameters:
+;	rdx The type of the sections to search.
+; 	rsi The address of the ELF64 binary.
+;	rdi	The address of the callback.
+elf64_section_foreach:
+	; Store
+	push rax
+	push rbx
+	push rcx
+
+	; Get section header address and count
+	xor rcx, rcx
+	mov rbx, qword [rsi + elf64_ehdr.e_shoff]	; Section header offset
+	add rbx, rsi								; Section header address
+	mov cx, word [rsi + elf64_ehdr.e_shnum]		; Number of section headers
+
+	; No sections?
+	cmp rcx, 0
+	je .end
+
+.handle:
+	; Check section type
+	mov eax, dword [rbx + elf64_shdr.sh_type]
+	cmp rax, rdx
+	jne .next
+
+	; Call callback
+	push rdx
+	push rsi
+	mov rdx, rsi
+	mov rsi, rbx
+	call rdi
+	pop rsi
+	pop rdx
+
+.next:
+	; Next?
+	add rbx, elf64_shdr.end
+	dec rcx
+	cmp rcx, 0
+	jne .handle
+
+.end:
+	; Restore
+	pop rcx
+	pop rbx
+	pop rax
+	ret
+
 ; Checks whether the given binary is a valid, executable, little endian
 ; ELF64 file that could be used for the kernel.
 ;

@@ -107,3 +107,141 @@ kernel_load:
 	mov rsi, message_kernel_broken
 	call screen_write
 	jmp $
+
+; Inspects the kernel binary and tries to extract configuration info.
+kernel_inspect:
+	; Store
+	push rdx
+	push rsi
+	push rdi
+
+	; Get kernel binary
+	mov rsi, kernel_module
+	mov rsi, qword [rsi]
+	mov rsi, qword [rsi + hydrogen_info_mod.begin]
+
+	; Search for string table section
+	mov rdi, kernel_inspect_strtbl
+	mov rdx, ELF_SHT_STRTAB
+	call elf64_section_foreach
+
+	; Found?
+	mov rdx, kernel_string_table
+	mov rdx, qword [rdx]
+	cmp rdx, 0
+	je .no_string_table
+
+	; Search for symbol table section
+	mov rdi, kernel_inspect_symtbl
+	mov rdx, ELF_SHT_SYMTAB
+	call elf64_section_foreach
+
+.no_string_table:
+	; Restore
+	pop rdi
+	pop rsi
+	pop rdx
+	ret
+
+; Sets the location of the kernel binary's string table, given the
+; string table's section header.
+;
+; Parameters:
+;	rsi The address of the string table's section header.
+;	rdx The address of the kernel binary.
+kernel_inspect_strtbl:
+	; Store
+	push rax
+
+	; Set the string table address
+	mov rax, qword [rsi + elf64_shdr.sh_offset]		; Offset into file
+	add rax, rdx									; Address
+	mov qword [kernel_string_table], rax
+
+	; Restore
+	pop rax
+	ret
+
+; Parses the kernel binary's symbol table and extracts configuration info.
+;
+; Parameters:
+;	rsi The address of the symbol table's section header.
+; 	rdx The address of the kernel binary.
+kernel_inspect_symtbl:
+	; Store
+	push rax
+	push rbx
+	push rcx
+	push rsi
+	push rdi
+
+	; Get address of symbols and end address of symbol table
+	mov rbx, qword [rsi + elf64_shdr.sh_offset]		; Offset into file
+	add rbx, rdx									; Address
+
+	mov rcx, qword [rsi + elf64_shdr.sh_size]		; Size of the section
+	add rcx, rbx									; End of symbol table
+	mov rsi, rbx									; Address of symbols
+
+	; No symbol?
+	cmp rcx, 0
+	je .end
+
+	; Iterate through symbols
+.symbol:
+	; Check the symbol name
+	mov edi, dword [rsi + elf64_sym.st_name]
+	add rdi, qword [kernel_string_table]
+
+	push rsi
+	mov rsi, kernel_symbol_config
+	call string_equal
+	pop rsi
+
+	; Config symbol?
+	cmp rax, 1
+	je .found
+
+	; Next?
+	add rsi, elf64_sym.end
+	cmp rsi, rcx
+	jl .symbol
+
+.end:
+	; Restore
+	pop rdi
+	pop rsi
+	pop rcx
+	pop rbx
+	pop rax
+	ret
+
+.found:
+	; Interpret header
+	mov rsi, qword [rsi + elf64_sym.st_value]
+	call kernel_inspect_config
+	jmp .end
+
+; Parses the kernel binary's hydrogen configuration table.
+;
+; Parameters:
+;	rsi Address of the table in the binary (virtual address!).
+;
+; Returns:
+;	rax 1 if the magic value matched, 0 otherwise.
+kernel_inspect_config:
+	; Check magic number
+	mov eax, dword [rsi + config_table.magic]
+	cmp rax, CONFIG_MAGIC
+	jne .magic_broken
+
+	; Return 1
+	mov rax, 1
+
+.end:
+	ret
+
+.magic_broken:
+	; Return 0
+	xor rax, rax
+	jmp .end

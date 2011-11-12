@@ -45,37 +45,45 @@ boot64_bsp:
 	call modules_sort						; Sort the modules (for moving)
 	call modules_move						; Move modules to new location
 
-	; Initialize the system
+	; Load the kernel
+	call kernel_find						; Search for the kernel
+	call kernel_load						; Load the kernel
+	call kernel_inspect						; Inspect the kernel binary
+
+	; Initialize interrupt handling
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
 
+	; Initialize interrupt controllers and IRQs
 	call lapic_enable						; Enable the LAPIC
 	call pic_init							; Initialize the 8259 PIC
 	call ioapic_init						; Initialize all I/O APICs
 	call irq_wire							; Wire IRQs
 
+	; Initialize the PIT
 	call pit_init							; Initialize the PIT
 	call pit_enable							; Enable the PIT
+
+	; Initialization with interrupts enabled
 	sti										; Enable interrupts
-
 	call smp_init							; Initialize SMP
+	cli										; Disable interrupts
 
-	cli										; Disable interrupt
+	; Prepare IRQs for kernel
 	call pit_disable						; Disable the PIT again (not used anymore)
-
-	; Initialize the kernel
-	call kernel_find						; Search for the kernel
-	call kernel_load						; Load the kernel
-	call kernel_inspect						; Inspect the kernel binary
+	call irq_set_masks						; Set IRQ masks
 
 	; Jump to the kernel
 	mov rsi, message_kernel
 	call screen_write
 
+	mov byte [entry_barrier], 1				; Open barrier
+
 	mov rax, kernel_entry
 	mov rax, qword [rax]
 	jmp rax
 
+; 64 bit entry point for APs.
 boot64_ap:
 	; Prepare
 	cli										; Clear interrupts
@@ -86,7 +94,25 @@ boot64_ap:
 	call lapic_enable						; Enable the LAPIC
 	call smp_init_ap						; Initialize SMP from AP side
 
+	; Check whether there is an AP entry point
+	mov rsi, config_table
+	mov rsi, qword [config_table]
+	mov rbx, qword [rsi + hydrogen_config_table.ap_entry]
+	cmp rbx, 0
+	je .halt_loop
+
+	; Spin on barrier until the BSP is ready
+	mov rsi, entry_barrier
+.spin:
+	lodsb
+	cmp rax, 0
+	je .spin
+
+	; Jump to the kernel
+	jmp rbx
+
 	; Halt loop
+.halt_loop:
 	sti
 .halt:
 	hlt

@@ -26,14 +26,18 @@ irq_wire:
 	; Store
 	push rax
 	push rcx
+	push rdx
 	push rsi
 	push rdi
 	push r8
 	push r9
 
-	; Iterate in IRQs
+	; Get IRQ table address
+	mov r9, qword [config_table]
+	mov r9, qword [r9 + hydrogen_config_table.irq_table]
+
+	; Iterate on IRQs
 	xor r8, r8				; Current IRQ number
-	mov r9, IRQ_VECTOR		; Current IRQ vector
 
 .next:
 	; Get GSI number
@@ -43,18 +47,22 @@ irq_wire:
 	add rsi, rax
 	mov ecx, dword [rsi]
 
+	; Get vector
+	xor rdx, rdx
+	mov dl, byte [r9]
+
 	; Get entry and value
 	call ioapic_entry_get
 	call ioapic_entry_read
 
 	; Set vector and write
 	and rax, ~IOAPIC_REDIR_VECTOR_MASK
-	or rax, r9
+	or rax, rdx
 	call ioapic_entry_write
 
 	; Next?
 	inc r8
-	inc r9
+	add r9, hydrogen_config_irq_entry.end
 	cmp r8, IRQ_COUNT
 	jl .next
 
@@ -62,6 +70,46 @@ irq_wire:
 	pop r9
 	pop r8
 	pop rdi
+	pop rsi
+	pop rdx
+	pop rcx
+	pop rax
+	ret
+
+; Set IRQ masks as given in the config table.
+;
+; Assumes all IRQs are currently masked and interrupts are disabled
+; and won't be enabled anymore before the jump into the kernel.
+irq_set_masks:
+	; Store
+	push rax
+	push rcx
+	push rsi
+
+	; Get IRQ table address
+	mov rsi, qword [config_table]
+	mov rsi, qword [rsi + hydrogen_config_table.irq_table]
+
+	; Iterate on IRQs
+	xor rcx, rcx				; Current IRQ number
+.next:
+	; Mask flag set?
+	mov rax, qword [rsi + hydrogen_config_irq_entry.flags]
+	and rax, HYDROGEN_CONFIG_IRQ_FLAG_MASK
+	cmp rax, 0
+	jne .mask_set
+
+	; Unmask IRQ
+	call irq_unmask
+
+.mask_set:
+	; Next?
+	add rsi, hydrogen_config_irq_entry.end
+	inc rcx
+	cmp rcx, IRQ_COUNT
+	jl .next
+
+	; Restore
 	pop rsi
 	pop rcx
 	pop rax

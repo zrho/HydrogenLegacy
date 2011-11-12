@@ -231,17 +231,27 @@ kernel_inspect_symtbl:
 ;	rax 1 if the magic value matched, 0 otherwise.
 kernel_inspect_config:
 	; Check magic number
-	mov eax, dword [rsi + config_table.magic]
-	cmp rax, CONFIG_MAGIC
+	mov eax, dword [rsi + hydrogen_config_table.magic]
+	cmp rax,  HYDROGEN_CONFIG_MAGIC
 	jne .magic_broken
+
+	; Set config table pointer
+	mov qword [config_table], rsi
+
+	; Default IRQ table, if none given
+	mov rax, qword [rsi + hydrogen_config_table.irq_table]
+	cmp rax, 0
+	jne .irq_table_given
+
+	mov rax, config_irq_table_default
+	mov qword [rsi + hydrogen_config_table.irq_table], rax
+.irq_table_given:
 
 	; Return 1
 	mov rax, 1
-
-.end:
 	ret
 
 .magic_broken:
 	; Return 0
 	xor rax, rax
-	jmp .end
+	ret

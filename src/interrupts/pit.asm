@@ -29,14 +29,22 @@ pit_init:
 	push rsi
 	push rdi
 
-	; Sets the PIT's frequency to PIT_FREQ
+	; Get the PIT IRQ vector
+	mov rdx, qword [config_table]
+	mov rdx, qword [rdx + hydrogen_config_table.irq_table]
+	mov dl, byte [rdx]
+	and rdx, 0xFF
+
+	; Set the PIT's frequency to PIT_FREQ
 	mov rax, PIT_FREQ
 	call pit_freq_set
 
 	; Set the IDT entry for the PIT to IRQ0
-	mov rcx, IRQ_VECTOR
+	push rdx
+	mov rcx, rdx
 	mov rdx, pit_tick
 	call int_write_entry
+	pop rdx
 
 	; Check if 8259 PIC is supported
 	mov rax, info_table.flags
@@ -58,7 +66,7 @@ pit_init:
 
 	; Map entry to PIT's IRQ vector
 	and rax, ~IOAPIC_REDIR_VECTOR_MASK
-	or rax, IRQ_VECTOR
+	or rax, rdx
 	call ioapic_entry_write
 
 	; Store new IRQ number

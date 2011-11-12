@@ -65,13 +65,14 @@ boot64_bsp:
 
 	; Initialize the kernel
 	call kernel_find						; Search for the kernel
-	call kernel_map							; Map the kernel
+	call kernel_load						; Load the kernel
 
 	; Jump to the kernel
 	mov rsi, message_kernel
 	call screen_write
 
-	mov rax, HYDROGEN_KERNEL_ENTRY_VADDR
+	mov rax, kernel_entry
+	mov rax, qword [rax]
 	jmp rax
 
 boot64_ap:

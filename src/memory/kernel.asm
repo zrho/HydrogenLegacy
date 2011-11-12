@@ -74,69 +74,36 @@ kernel_find:
 	pop rax
 	ret
 
-kernel_map:
+; Checks and loads the kernel binary.
+kernel_load:
 	; Store
 	push rax
-	push rcx
 	push rsi
-	push rdi
 
-	; Clear PDP
-	mov rdi, paging_pdp_kernel
-	xor rax, rax
-	mov rcx, 512
-	rep stosq
+	; Get the address of the kernel binary
+	mov rsi, kernel_module
+	mov rsi, qword [rsi]
+	mov rsi, qword [rsi + hydrogen_info_mod.begin]
 
-	; Clear PD
-	mov rdi, paging_pd_kernel
-	mov rcx, 512
-	rep stosq
+	; Check the binary
+	call elf64_check
+	cmp rax, 0
+	je .broken
 
-	; Clear PT
-	mov rdi, paging_pt_kernel
-	mov rcx, 512
-	rep stosq
+	; Load the binary
+	call elf64_load
 
-	; Map PDP in PML4
-	mov rax, paging_pdp_kernel
-	or rax, PAGE_FLAG_PW; | PAGE_FLAG_GLOBAL
-	mov qword [paging_pml4 + 510 * 8], rax
-
-	; Map PD in PDP
-	mov rax, paging_pd_kernel
-	or rax, PAGE_FLAG_PW; | PAGE_FLAG_GLOBAL
-	mov qword [paging_pdp_kernel], rax
-
-	; Map PT in PD
-	mov rax, paging_pt_kernel
-	or rax, PAGE_FLAG_PW; | PAGE_FLAG_GLOBAL
-	mov qword [paging_pd_kernel], rax
-
-	; Get size of kernel binary
-	mov rsi, qword [kernel_module]			; Get kernel mod structure
-	mov rcx, qword [rsi + hydrogen_info_mod.length] ; Get module length
-
-	; Map pages in PT
-	mov rax, qword [rsi + hydrogen_info_mod.begin]
-	or rax, PAGE_FLAG_PW; | PAGE_FLAG_GLOBAL
-	mov rdi, paging_pt_kernel
-
-	cmp rcx, 0								; Page remaining?
-	jle .end
-.page_map:
-	stosq									; Write entry
-	add rax, 0x1000							; Advance by one page
-	sub rcx, 0x1000							; Subtract from remaining length
-	cmp rcx, 0								; Memory left for mapping?
-	jg .page_map
-
-.end:
-	mov rsi, HYDROGEN_KERNEL_ENTRY_VADDR
-	mov rax, qword [rsi]
+	; Get the kernel entry point
+	mov rax, qword [rsi + elf64_ehdr.e_entry]
+	mov qword [kernel_entry], rax
 
 	; Restore
-	pop rdi
 	pop rsi
-	pop rcx
 	pop rax
 	ret
+
+.broken:
+	; Panic
+	mov rsi, message_kernel_broken
+	call screen_write
+	jmp $

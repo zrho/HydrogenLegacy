@@ -29,6 +29,7 @@
 %include "../inc/idt.asm"
 %include "../inc/irq.asm"
 %include "../inc/pit.asm"
+%include "../inc/elf64.asm"
 
 ;-------------------------------------------------------------------------------
 ; Code
@@ -47,6 +48,7 @@
 %include "memory/kernel.asm"
 %include "memory/page.asm"
 %include "memory/frame.asm"
+%include "memory/elf64.asm"
 
 %include "interrupts/idt.asm"
 %include "interrupts/lapic.asm"

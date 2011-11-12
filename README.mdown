@@ -32,6 +32,8 @@ Features
   - Legacy Initialization: Hydrogen initializes components like the 8259 PIC and
     sets them to a default state that requires no further setup when the
     component is not used or only little in the case it is.
+  - ELF64 Support: Pass your kernel as an ELF64 executable file and it is
+  	automatically mapped to the right virtual addresses.
 
 Build Requirements
 ----------------------
@@ -51,27 +53,31 @@ Limitations
 Currenty Hydrogen identity maps the first 64GB of physical memory using 2MB
 pages. Behaviour on systems with more than 64GB of memory installed is undefined.
 
-Also, Hydrogen only supports loading of flat binary kernels smaller than 2MB;
-the binary must begin on its entry point.
+Make sure your ELF64 kernel is only loaded into the higher half of the address
+space.
 
 How To Use
 ----------------------
-Hydrogen searches for a multiboot module with the cmdline string 'kernel64',
-maps it to the higher half address 0xFFFFFF0000000000 and onwards (maximum size:
-2 MB) and jumps to that address afterwards, so be sure your *flat* kernel binary
-begins with its entry point (Loading of more sophisticated type of binaries,
-like ELF64 may be implemented in the future).
+Hydrogen searches for an ELF64 kernel binary as multiboot module with the
+cmdline string 'kernel64', loads it into virtual memory and jumpts to its entry
+point.
 
 Hydrogen is loaded at 0x100000 (the 1MB mark) and reserves 16kB of memory for
 code and data, which can be reclaimed by the kernel with no risk. Behind that,
 i.e. to 0x104000, all info tables and system structures (like GDT, IDT and paging
 structures) are placed (see inc/memory.h and inc/info.h for more details), followed
-by the loaded modules. The free_mem_begin field of the main info table points to
-the address after the last module.
+by the loaded modules, the kernel binary and paging structures. The free_mem_begin
+field of the main info table points to the first freely available page in physical
+memory.
 
 When the PIC flag is set in the flags field of the info table, the loader has
 detected and initialized an 8259 PIC. Its first IRQ vector is set to 0x30 and
 all IRQs are masked.
+
+Additionally, Hydrogen initializes all I/O APICs in the system and sets up
+the redirections of all global system interrupts that map to ISA IRQs to begin
+at vector 0x30 (note that I/O APIC and PIC use the same vectors, so make sure
+to keep them masked in at least one of them). All redirections are masked. 
 
 Related Work
 ----------------------

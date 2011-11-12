@@ -62,6 +62,9 @@ sys_gdtr64:
 ; The address of the descriptor of the module that hosts the kernel
 kernel_module: dq 0x0
 
+; The address of the kernel entry point
+kernel_entry: dq 0x0
+
 ;-------------------------------------------------------------------------------
 ; Messages
 ;-------------------------------------------------------------------------------
@@ -78,6 +81,9 @@ message_ap_started:
 message_no_kernel:
 	db "PANIC: No kernel binary could be found. Make sure to pass "
 	db "the kernel as a module with cmdline beginning with 'kernel64'.", 0
+
+message_kernel_broken:
+	db "PANIC: Kernel binary is no executable, little-endian ELF64 file.", 0
 
 message_kernel:
 	db "Starting kernel...", 0

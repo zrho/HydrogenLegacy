@@ -44,4 +44,3 @@
 ;-------------------------------------------------------------------------------
 
 %define HYDROGEN_MEMORY_SCREEN_PADDR	0xb8000
-%define HYDROGEN_KERNEL_ENTRY_VADDR		0xFFFFFF0000000000

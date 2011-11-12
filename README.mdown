@@ -13,6 +13,10 @@ Ships with a compiled copy of the GRUB2 bootloader (as stage2_eltorito image).
 This binary can easily be replaced by any other compilation of GRUB2 that supports
 iso9660 and multiboot or any other compatible boot loader.
 
+Also ships with example kernels (grouped by primary language) in examples/. Build
+them using *make all* in their respective directory, copy the resulting kernel.bin
+to iso/boot/ and run *make run*.
+
 Features
 ----------------------
 
@@ -34,6 +38,9 @@ Features
     component is not used or only little in the case it is.
   - ELF64 Support: Pass your kernel as an ELF64 executable file and it is
   	automatically mapped to the right virtual addresses.
+  - Configurability: Put a configuration table in your kernel binary to alter
+    Hydrogen's default behavior, e.g. an AP entry point or IRQ to interrupt
+    vector mappings.
 
 Build Requirements
 ----------------------
@@ -47,6 +54,7 @@ Hydrogen requires the following tools to build:
 Hydrogen has been tested using following emulators:
 
   - bochs (tested version: 2.4.6)
+  - qemu-system-x86_64 (tested version: 0.15.1; using qemu-kvm-0.15.1)
   
 Limitations
 ----------------------
@@ -54,12 +62,12 @@ Currenty Hydrogen identity maps the first 64GB of physical memory using 2MB
 pages. Behaviour on systems with more than 64GB of memory installed is undefined.
 
 Make sure your ELF64 kernel is only loaded into the higher half of the address
-space.
+space to avoid collisions with memory mapped in the lower half.
 
 How To Use
 ----------------------
 Hydrogen searches for an ELF64 kernel binary as multiboot module with the
-cmdline string 'kernel64', loads it into virtual memory and jumpts to its entry
+cmdline string 'kernel64', loads it into virtual memory and jumps to its entry
 point.
 
 Hydrogen is loaded at 0x100000 (the 1MB mark) and reserves 16kB of memory for
@@ -72,12 +80,20 @@ memory.
 
 When the PIC flag is set in the flags field of the info table, the loader has
 detected and initialized an 8259 PIC. Its first IRQ vector is set to 0x30 and
-all IRQs are masked.
+all IRQs are masked (even when a modified IRQ to vector map is given in the
+config table).
 
 Additionally, Hydrogen initializes all I/O APICs in the system and sets up
 the redirections of all global system interrupts that map to ISA IRQs to begin
-at vector 0x30 (note that I/O APIC and PIC use the same vectors, so make sure
-to keep them masked in at least one of them). All redirections are masked. 
+at vector 0x30 by default (note that I/O APIC and PIC use the same vectors, so
+make sure to keep them masked in at least one of them). All redirections are masked.
+
+You can pass a configuration table to Hydrogen by creating a symbol 'hydrogen_config'.
+Using the table you can (also see inc/config.asm):
+
+ - Define an entry point for your APs.
+ - Alter IRQ to interrupt vector mappings.
+ - Unmask a set of IRQs (both only on the I/O APICs, not on the PIC).
 
 Related Work
 ----------------------

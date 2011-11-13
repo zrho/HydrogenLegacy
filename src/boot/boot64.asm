@@ -56,6 +56,7 @@ boot64_bsp:
 
 	; Initialize interrupt controllers and IRQs
 	call lapic_enable						; Enable the LAPIC
+	call lapic_timer_lvt_calc				; Calculate the LVT for the timer
 	call pic_init							; Initialize the 8259 PIC
 	call ioapic_init						; Initialize all I/O APICs
 	call irq_wire							; Wire IRQs
@@ -66,6 +67,7 @@ boot64_bsp:
 
 	; Initialization with interrupts enabled
 	sti										; Enable interrupts
+	call lapic_timer_calibrate				; Calibrate the LAPIC timer
 	call smp_init							; Initialize SMP
 	cli										; Disable interrupts
 
@@ -76,7 +78,6 @@ boot64_bsp:
 	; Jump to the kernel
 	mov rsi, message_kernel
 	call screen_write
-
 	mov byte [entry_barrier], 1				; Open barrier
 
 	mov rax, kernel_entry
@@ -92,7 +93,15 @@ boot64_ap:
 	; Initialize
 	call int_load							; Load IDT
 	call lapic_enable						; Enable the LAPIC
-	call smp_init_ap						; Initialize SMP from AP side
+	call pit_redirect						; Redirect the PIT to this processor
+
+	; Initialization with interrupts
+	sti
+	call lapic_timer_calibrate				; Calibrate the LAPIC timer
+	cli
+
+	; Finalize AP initialization
+	call smp_init_ap
 
 	; Check whether there is an AP entry point
 	mov rsi, config_table

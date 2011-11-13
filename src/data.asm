@@ -43,6 +43,7 @@ config_table_default:
 	dd 0
 	dq 0
 	dq config_irq_table_default
+	db LAPIC_TIMER_VECTOR
 
 ; Default IRQ table
 config_irq_table_default:
@@ -52,7 +53,6 @@ config_irq_table_default:
 		db HYDROGEN_CONFIG_IRQ_FLAG_MASK
   		%assign i i+1
 	%endrep
-
 
 ;-------------------------------------------------------------------------------
 ; Info Table
@@ -136,3 +136,8 @@ screen:
 ; When an AP entry point is given, APs will spin on this value before they
 ; enter the kernel, until it is set to 1.
 entry_barrier: db 0
+
+; The value of the LAPIC timer LVT.
+;
+; Set by lapic_timer_init.
+lapic_timer_lvt: dd 0

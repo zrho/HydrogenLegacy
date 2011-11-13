@@ -80,10 +80,13 @@ endstruc
 ;
 ; .acpi_id		The ACPI id of the processor.
 ; .apic_id		The APIC id of the processor.
+; .flags 		Flags.
+; .lapic_freq	Ticks of the LAPIC timer per second.
 struc hydrogen_info_proc
 	.acpi_id:					RESB	1
 	.apic_id:					RESB	1
 	.flags:						RESB	2
+	.lapic_freq:				RESB	4
 	.end:
 endstruc
 

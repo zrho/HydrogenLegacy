@@ -17,6 +17,10 @@
 ; Magic number for configuration header
 %define HYDROGEN_CONFIG_MAGIC	0x6FD6B53A
 
+; Flags for hydrogen_config_table
+%define HYDROGEN_CONFIG_FLAG_LAPIC_TIMER_ONESHOT  (1 << 0)
+%define HYDROGEN_CONFIG_FLAG_LAPIC_TIMER_UNMASKED (1 << 1)
+
 ; Configuration table the kernel can use to alter Hydrogen's
 ; default behavior.
 ;
@@ -26,18 +30,20 @@
 ;				zero (0) to hlt them.
 ; .irq_table	Pointer to the IRQ table (16 entries) or
 ;				zero (0) for defaults.
+; .lapic_tmrvec Vector for the LAPIC timer.
 struc hydrogen_config_table
 	.magic:						RESB 4
 	.flags:						RESB 4
 	.ap_entry:					RESB 8
 	.irq_table:					RESB 8
+	.lapic_tmrvec:				RESB 1
 	.end:
 endstruc
 
 ; Number of entries in hydrogen_config_table.irq_table
 %define  HYDROGEN_CONFIG_IRQ_COUNT		16
 
-; Flags for config_irq_entry
+; Flags for hydrogen_config_irq_entry
 %define  HYDROGEN_CONFIG_IRQ_FLAG_MASK	(1 << 0)
 
 ; Entry in the IRQ table.

@@ -72,7 +72,7 @@ int_write_entry:
 	mov dword [rdi + int_idt_entry.handlerHigh], edx
 
 	; Restore
-	pop rcx
-	pop rdx
 	pop rdi
+	pop rdx
+	pop rcx
 	ret

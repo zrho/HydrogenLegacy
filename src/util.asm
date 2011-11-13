@@ -281,6 +281,38 @@ wait_ticks:
 ; 	info_proc_addr rsi, rax
 %macro info_proc_addr 2
 	mov %1, %2				; Load index into target register
-	shl %1, 2				; Multiply with four to get offset
+	shl %1, 3				; Multiply with four to get offset
 	add %1, info_proc		; Add list address
+%endmacro
+
+; Macro for printing a two character string to the upper right corner of the
+; screen.
+;
+; Parameters:
+; 	%1 The two characters to print.
+%macro debug 1
+	; Store
+	push rax
+	push rbx
+	push rdi
+
+	mov rdi, HYDROGEN_MEMORY_SCREEN_PADDR + (SCREEN_WIDTH - 2) * 2
+	mov rbx, %1
+	xor rax, rax
+
+	; First character
+	mov al, bl
+	or rax, SCREEN_ATTR
+	stosw
+
+	; Second character
+	mov ax, bx
+	shr rax, 8
+	or rax, SCREEN_ATTR
+	stosw
+
+	; Restore
+	pop rdi
+	pop rbx
+	pop rax
 %endmacro

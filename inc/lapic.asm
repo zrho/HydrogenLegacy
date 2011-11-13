@@ -25,9 +25,9 @@
 %define LAPIC_ICR_LOW_OFFSET	0x300
 %define LAPIC_ICR_HIGH_OFFSET	0x310
 %define LAPIC_LVT_TIMER_OFFSET	0x320
-%define LAPIC_TIMER_INIT_OFFSET	0x320
-%define LAPIC_TIMER_CUR_OFFSET	0x320
-%define LAPIC_TIMER_DIV_OFFSET	0x320
+%define LAPIC_TIMER_INIT_OFFSET	0x380
+%define LAPIC_TIMER_CUR_OFFSET	0x390
+%define LAPIC_TIMER_DIV_OFFSET	0x3E0
 
 ;-------------------------------------------------------------------------------
 ; LAPIC - ICR
@@ -53,3 +53,13 @@
 
 %define LAPIC_MODE_PHYSICAL		0
 %define LAPIC_MODE_LOGICAL		1
+
+;-------------------------------------------------------------------------------
+; LAPIC - Timer
+;-------------------------------------------------------------------------------
+
+%define LAPIC_TIMER_VECTOR		0x40
+
+%define LAPIC_TIMER_MODE_OFFSET 	17
+%define LAPIC_TIMER_MODE_PERIODIC	1
+%define LAPIC_TIMER_MODE_ONESHOT	0

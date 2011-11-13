@@ -89,6 +89,11 @@ smp_init:
 	cmp rax, 0
 	je .wait_for_ready
 
+	; Redirect the PIT to the BSP again, as it is needed
+	; for the next wait and must be directed to the BSP
+	; in the end anyway.
+	call pit_redirect
+
 	; Print message
 	push rsi					; Save rsi
 	mov rsi, message_ap_started
@@ -97,9 +102,9 @@ smp_init:
 
 .proc_next:
 	; Next processor available?
-	add rsi, 4				; Advance to next processor structure
-	dec rcx					; Decrease count of remaining processors
-	cmp rcx, 0				; Processor left?
+	add rsi, hydrogen_info_proc.end		; Advance to next processor structure
+	dec rcx								; Decrease count of remaining processors
+	cmp rcx, 0							; Processor left?
 	jne .proc_start
 
 	; Restore

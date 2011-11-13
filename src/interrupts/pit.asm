@@ -117,6 +117,49 @@ pit_freq_set:
 	pop rax
 	ret
 
+; Redirects the PIT IRQ to the current processor.
+pit_redirect:
+	; Store
+	push rax
+	push rbx
+	push rcx
+	push rdx
+	push rsi
+	push rdi
+
+	; Get processor's APIC id and PIT IRQ
+	call smp_id				; Get the current processor's APIC id
+	mov rdx, rax			; And store it in rdx
+	mov cl, byte [pit_irq]	; Get the IRQ number of the PIT
+
+	; Get GSI number for IRQ
+	shl rcx, 2								; IRQ * 2: Offset in irq2gsi table
+	mov rsi, info_table.irq_to_gsi
+	add rsi, rcx							; Address of GSI
+	mov ecx, dword [rsi]					; GSI number
+
+	; Get I/O APIC redirection entry
+	call ioapic_entry_get
+	call ioapic_entry_read
+
+	; Write new target
+	mov rbx, ~(IOAPIC_REDIR_DEST_MASK << IOAPIC_REDIR_DEST_OFFSET)
+	and rax, rbx
+	shl rdx, IOAPIC_REDIR_DEST_OFFSET		; APIC id as destination
+	or rax, rdx
+
+	; Write entry
+	call ioapic_entry_write
+
+	; Restore
+	pop rdi
+	pop rsi
+	pop rdx
+	pop rcx
+	pop rbx
+	pop rax
+	ret
+
 pit_enable:
 	; Store
 	push rcx

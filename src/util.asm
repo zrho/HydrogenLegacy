@@ -92,6 +92,7 @@ string_copy:
 string_equal:
 	; Store
 	push rbx
+	push rcx
 	push rsi
 	push rdi
 
@@ -119,6 +120,7 @@ string_equal:
 	; Restore
 	pop rdi
 	pop rsi
+	pop rcx
 	pop rbx
 	ret
 

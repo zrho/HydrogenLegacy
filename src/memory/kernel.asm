@@ -255,3 +255,98 @@ kernel_inspect_config:
 	; Return 0
 	xor rax, rax
 	ret
+
+; Uses the config table and maps the stacks to their designated
+; virtual addresses.
+kernel_map_stacks:
+	; Store
+	push rax
+	push rbx
+	push rcx
+	push rdx
+	push rsi
+	push rdi
+
+	; Get stack_vaddr
+	mov rbx, qword [config_table]
+	mov rax, qword [rbx + hydrogen_config_table.stack_vaddr]
+
+	; Check if zero
+	cmp rax, 0
+	je .end
+
+	; Map stacks
+	mov rdx, PAGE_FLAG_PW | PAGE_FLAG_GLOBAL
+	mov rsi, rax
+	mov rdi, stack_heap
+	mov rcx, 32
+
+.map_next:
+	call page_map
+
+	; Next page
+	add rsi, 0x1000
+	add rdi, 0x1000
+	dec rcx
+	cmp rcx, 0
+	jne .map_next
+
+	jmp .end
+
+.end:
+	; Restore
+	pop rdi
+	pop rsi
+	pop rdx
+	pop rcx
+	pop rbx
+	pop rax
+	ret
+
+; Uses the config table and maps the info table to its designated
+; virtual address.
+kernel_map_info:
+	; Store
+	push rax
+	push rbx
+	push rcx
+	push rdx
+	push rsi
+	push rdi
+
+	; Get info_vaddr
+	mov rbx, qword [config_table]
+	mov rax, qword [rbx + hydrogen_config_table.info_vaddr]
+
+	; Check if zero
+	cmp rax, 0
+	je .end
+
+	; Map info table
+	mov rdx, PAGE_FLAG_PW | PAGE_FLAG_GLOBAL
+	mov rsi, rax
+	mov rdi, info_table
+	mov rcx, 6
+
+.map_next:
+	call page_map
+
+	; Next page
+	add rsi, 0x1000
+	add rdi, 0x1000
+	dec rcx
+	cmp rcx, 0
+	jne .map_next
+
+	jmp .end
+
+	; Fall through
+.end:
+	; Restore
+	pop rdi
+	pop rsi
+	pop rdx
+	pop rcx
+	pop rbx
+	pop rax
+	ret

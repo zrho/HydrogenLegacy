@@ -31,12 +31,18 @@
 ; .irq_table	Pointer to the IRQ table (16 entries) or
 ;				zero (0) for defaults.
 ; .lapic_tmrvec Vector for the LAPIC timer.
+; .info_vaddr	The virtual address to map the info table
+;				to or zero (0), if it should not be mapped.
+; .stack_vaddr	The virtual address to map the stacks to
+;				or zero (0), if they should not be mapped.
 struc hydrogen_config_table
 	.magic:						RESB 4
 	.flags:						RESB 4
 	.ap_entry:					RESB 8
 	.irq_table:					RESB 8
 	.lapic_tmrvec:				RESB 1
+	.info_vaddr:				RESB 8
+	.stack_vaddr:				RESB 8
 	.end:
 endstruc
 

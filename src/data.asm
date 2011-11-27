@@ -44,6 +44,8 @@ config_table_default:
 	dq 0
 	dq config_irq_table_default
 	db LAPIC_TIMER_VECTOR
+	dq 0
+	dq 0
 
 ; Default IRQ table
 config_irq_table_default:

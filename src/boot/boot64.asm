@@ -50,6 +50,9 @@ boot64_bsp:
 	call kernel_load						; Load the kernel
 	call kernel_inspect						; Inspect the kernel binary
 
+	call kernel_map_info					; Maps the info tables
+	call kernel_map_stacks					; Maps the stacks
+
 	; Initialize interrupt handling
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
@@ -74,6 +77,9 @@ boot64_bsp:
 	; Prepare IRQs for kernel
 	call pit_disable						; Disable the PIT again (not used anymore)
 	call irq_set_masks						; Set IRQ masks
+
+	; Reload stack
+	call boot64_reload_stack
 
 	; Jump to the kernel
 	mov rsi, message_kernel
@@ -103,6 +109,9 @@ boot64_ap:
 	; Finalize AP initialization
 	call smp_init_ap
 
+	; Reload stack
+	call boot64_reload_stack
+
 	; Check whether there is an AP entry point
 	mov rsi, config_table
 	mov rsi, qword [config_table]
@@ -111,6 +120,7 @@ boot64_ap:
 	je .halt_loop
 
 	; Spin on barrier until the BSP is ready
+	xor rax, rax
 	mov rsi, entry_barrier
 .spin:
 	lodsb
@@ -126,3 +136,35 @@ boot64_ap:
 .halt:
 	hlt
 	jmp .halt
+
+; Reloads the stack, now with its designated virtual address.
+;
+; Returns:
+;	rsp The new stack address.
+boot64_reload_stack:
+	; Store
+	push rax
+	push rbx
+	push rsi
+
+	; Get the virtual address for the stack
+	mov rsi, qword [config_table]
+	mov rax, qword [rsi + hydrogen_config_table.stack_vaddr]
+
+	; Virtual stack address given?
+	cmp rax, 0
+	je .end
+
+	; Calulcate offset into stack heap
+	mov rbx, stack_heap
+	sub rsp, rbx
+
+	; Add virtual address
+	add rsp, rax
+
+	; Restore
+.end:
+	pop rsi
+	pop rbx
+	pop rax
+	ret

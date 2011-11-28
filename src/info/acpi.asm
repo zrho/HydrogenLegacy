@@ -195,8 +195,8 @@ acpi_madt_parse:
 	push rsi
 
 	; LAPIC address
-	mov rax, [rsi + acpi_madt.lapic_addr] 	; Get LAPIC address and
-	mov [info_table.lapic_paddr], rax		; write it into the info table
+	mov eax, dword [rsi + acpi_madt.lapic_addr] 	; Get LAPIC address and
+	mov [info_table.lapic_paddr], rax				; write it into the info table
 
 	; PIC availability
 	mov rax, [rsi + acpi_madt.flags]		; Get flags

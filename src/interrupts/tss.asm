@@ -56,7 +56,6 @@ tss_init:
 	; Update GDT size
 	mov rax, rbx
 	add rax, 16 - 1			; limit = size - 1 = offset + 16 - 1
-	xchg bx, bx
 	mov word [sys_gdtr64.length], ax
 
 	; Reload GDT

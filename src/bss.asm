@@ -38,6 +38,7 @@ info_strings:	resb 0x1000
 
 sys_idt64:	resb 0x1000
 sys_gdt64:	resb 0x1000
+sys_tss64:	resb 0x1000
 
 ;-------------------------------------------------------------------------------
 ; BSS - Paging

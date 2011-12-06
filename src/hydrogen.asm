@@ -57,6 +57,7 @@
 %include "interrupts/pic.asm"
 %include "interrupts/irq.asm"
 %include "interrupts/pit.asm"
+%include "interrupts/tss.asm"
 
 %include "screen.asm"
 %include "smp.asm"

@@ -57,6 +57,9 @@ boot64_bsp:
 	call int_init							; Initialize IDT
 	call int_load							; Load IDT
 
+	; Prepare TSS
+	call tss_init							; Write and load TSS
+
 	; Initialize interrupt controllers and IRQs
 	call lapic_enable						; Enable the LAPIC
 	call lapic_timer_lvt_calc				; Calculate the LVT for the timer
@@ -93,17 +96,18 @@ boot64_bsp:
 ; 64 bit entry point for APs.
 boot64_ap:
 	; Prepare
-	cli										; Clear interrupts
-	and rsp, ~0xFFF							; Reset stack
+	cli									; Clear interrupts
+	and rsp, ~0xFFF						; Reset stack
 
 	; Initialize
-	call int_load							; Load IDT
-	call lapic_enable						; Enable the LAPIC
-	call pit_redirect						; Redirect the PIT to this processor
+	call int_load						; Load IDT
+	call lapic_enable					; Enable the LAPIC
+	call pit_redirect					; Redirect the PIT to this processor
+	call tss_init						; Write and load TSS
 
 	; Initialization with interrupts
 	sti
-	call lapic_timer_calibrate				; Calibrate the LAPIC timer
+	call lapic_timer_calibrate			; Calibrate the LAPIC timer
 	cli
 
 	; Finalize AP initialization

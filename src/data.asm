@@ -61,7 +61,7 @@ config_irq_table_default:
 ;-------------------------------------------------------------------------------
 
 info_ioapic_next: dq info_ioapic
-info_string_next: dq info_strings
+info_string_offset: dq 0x1
 
 ;-------------------------------------------------------------------------------
 ; System Tables and their pointers

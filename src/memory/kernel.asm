@@ -36,10 +36,13 @@ kernel_find:
 	mov rsi, info_mods
 
 .parse:
-	; Cmdline is null-pointer?
+	; Cmdline string offset equals zero?
 	mov rdx, qword [rsi + hydrogen_info_mod.cmdline]
 	cmp rdx, 0
 	je .next
+
+	; Add address of string table
+	add rdx, info_strings
 
 	; Cmdline begins with kernel module name
 	mov rbx, "kernel64"

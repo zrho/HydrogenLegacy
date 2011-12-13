@@ -115,7 +115,7 @@ endstruc
 ;
 ; .begin		The 64 bit physical address the module begins at.
 ; .length		The length of the module in bytes.
-; .cmdline		The path of the module file and its arguments.
+; .cmdline		The path of the module file and its arguments (offset in strings)
 struc hydrogen_info_mod
 	.begin						RESB	8
 	.length						RESB 	8

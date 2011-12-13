@@ -170,10 +170,12 @@ multiboot_mods_parse:
 	mov eax, dword [rsi + multiboot_mod_list.cmdline]	; Get string address
 	mov rsi, rax										; str address to rsi
 
-	mov rdi, qword [info_string_next]	; Get target address
-	mov rax, rdi					 	; Save rdi on rax
+	mov rdi, qword [info_string_offset]	; Get offset into string table
+	mov rax, rdi					 	; Save rdi on rax (to save it later on)
+	add rdi, info_strings				; Add address of string table
 	call string_copy				 	; Copy the string
-	mov qword [info_string_next], rdi	; Update string heap
+	sub rdi, info_strings				; Subtract address to get offset
+	mov qword [info_string_offset], rdi	; Update string offset
 	pop rdi								; Restore rdi
 	pop rsi								; and rsi
 	stosq								; Write stored rax to descriptor

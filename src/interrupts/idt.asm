@@ -23,56 +23,56 @@ bits 64
 
 ; Clears the interrupt descriptor table.
 int_init:
-	; Store
-	push rax
-	push rcx
-	push rdi
+    ; Store
+    push rax
+    push rcx
+    push rdi
 
-	; Clear IDT
-	mov rdi, sys_idt64					; Load idt address
-	mov rcx, 512						; 4kB = 512 * 8 byte
-	xor rax, rax						; Fill with zeroes
-	rep stosq
+    ; Clear IDT
+    mov rdi, sys_idt64                    ; Load idt address
+    mov rcx, 512                        ; 4kB = 512 * 8 byte
+    xor rax, rax                        ; Fill with zeroes
+    rep stosq
 
-	; Restore
-	pop rdi
-	pop rcx
-	pop rax
-	ret
+    ; Restore
+    pop rdi
+    pop rcx
+    pop rax
+    ret
 
 ; Loads the IDT into the CPU's registers
 int_load:
-	lidt [sys_idtr64]
-	ret
+    lidt [sys_idtr64]
+    ret
 
 ; Writes an idt entry with the vector given in rcx, using the default code
 ; segment (0x8) and default flags (0x8E).
 ;
 ; Parameters:
-;	rcx The vector of the entry to write.
-;	rdx	The address of the interrupt handler.
+;    rcx The vector of the entry to write.
+;    rdx    The address of the interrupt handler.
 int_write_entry:
-	; Store
-	push rcx
-	push rdx
-	push rdi
+    ; Store
+    push rcx
+    push rdx
+    push rdi
 
-	; Calculate entry address
-	mov rdi, sys_idt64
-	shl rcx, 4			; Multiply vector with entry size (16)
-	add rdi, rcx
+    ; Calculate entry address
+    mov rdi, sys_idt64
+    shl rcx, 4            ; Multiply vector with entry size (16)
+    add rdi, rcx
 
-	; Write entry
-	mov word [rdi + int_idt_entry.handlerLow], dx
-	mov word [rdi + int_idt_entry.cs], 0x8
-	mov byte [rdi + int_idt_entry.flags], 0x8E
-	shr rdx, 16
-	mov word [rdi + int_idt_entry.handlerMiddle], dx
-	shr rdx, 16
-	mov dword [rdi + int_idt_entry.handlerHigh], edx
+    ; Write entry
+    mov word [rdi + int_idt_entry.handlerLow], dx
+    mov word [rdi + int_idt_entry.cs], 0x8
+    mov byte [rdi + int_idt_entry.flags], 0x8E
+    shr rdx, 16
+    mov word [rdi + int_idt_entry.handlerMiddle], dx
+    shr rdx, 16
+    mov dword [rdi + int_idt_entry.handlerHigh], edx
 
-	; Restore
-	pop rdi
-	pop rdx
-	pop rcx
-	ret
+    ; Restore
+    pop rdi
+    pop rdx
+    pop rcx
+    ret

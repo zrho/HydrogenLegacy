@@ -21,23 +21,23 @@
 ; Structure for the multiboot info table that is passed by a multiboot 1.0
 ; bootloader.
 ;
-; .flags 			Flags.
+; .flags             Flags.
 ; .mem_lower
 ; .mem_upper
 ; .boot_device
-; .cmdline			Name of loader binary on disk and arguments.
-; .mods_count		Number of loaded modules.
-; .mods_addr		32 bit physical address of module list.
+; .cmdline            Name of loader binary on disk and arguments.
+; .mods_count        Number of loaded modules.
+; .mods_addr        32 bit physical address of module list.
 ; .aout_tabsz
 ; .aout_strsz
 ; .aout_addr
 ; .aout_reserved
-; .mmap_length		Length of the memory map.
-; .mmap_addr		32 bit physical address of memory map.
+; .mmap_length        Length of the memory map.
+; .mmap_addr        32 bit physical address of memory map.
 ; .drives_length
 ; .drives_addr
 ; .config_table
-; .boot_loader_name	Name of the bootloader.
+; .boot_loader_name    Name of the bootloader.
 ; .apm_table
 ; .vbe_control_info
 ; .vbe_mode
@@ -45,47 +45,47 @@
 ; .vbe_interface_off
 ; .vbe_interface_len
 struc multiboot_info
-	.flags:					RESB 4
-	.mem_lower:				RESB 4
-	.mem_upper:				RESB 4
-	.boot_device:			RESB 4
-	.cmdline:				RESB 4
-	.mods_count:			RESB 4
-	.mods_addr:				RESB 4
-	.aout_tabsz:			RESB 4
-	.aout_strsz:			RESB 4
-	.aout_addr:				RESB 4
-	.aout_reserved:			RESB 4
-	.mmap_length:			RESB 4
-	.mmap_addr:				RESB 4
-	.drives_length:			RESB 4
-	.drives_addr:			RESB 4
-	.config_table:			RESB 4
-	.boot_loader_name:		RESB 4
-	.apm_table:				RESB 4
-	.vbe_control_info:		RESB 4
-	.vbe_mode_info:			RESB 4
-	.vbe_mode:				RESB 4
-	.vbe_interface_seg:		RESB 4
-	.vbe_interface_off:		RESB 2
-	.vbe_interface_len:		RESB 2
-	.end:
+    .flags:                    RESB 4
+    .mem_lower:                RESB 4
+    .mem_upper:                RESB 4
+    .boot_device:            RESB 4
+    .cmdline:                RESB 4
+    .mods_count:            RESB 4
+    .mods_addr:                RESB 4
+    .aout_tabsz:            RESB 4
+    .aout_strsz:            RESB 4
+    .aout_addr:                RESB 4
+    .aout_reserved:            RESB 4
+    .mmap_length:            RESB 4
+    .mmap_addr:                RESB 4
+    .drives_length:            RESB 4
+    .drives_addr:            RESB 4
+    .config_table:            RESB 4
+    .boot_loader_name:        RESB 4
+    .apm_table:                RESB 4
+    .vbe_control_info:        RESB 4
+    .vbe_mode_info:            RESB 4
+    .vbe_mode:                RESB 4
+    .vbe_interface_seg:        RESB 4
+    .vbe_interface_off:        RESB 2
+    .vbe_interface_len:        RESB 2
+    .end:
 endstruc
 
 %define MULTIBOOT_MMAP_ENTRY_AVL 1
 
 struc multiboot_mmap_entry
-	.size:					RESB 4
-	.addr:					RESB 8
-	.len:					RESB 8
-	.type:					RESB 4
-	.end:
+    .size:                    RESB 4
+    .addr:                    RESB 8
+    .len:                    RESB 8
+    .type:                    RESB 4
+    .end:
 endstruc
 
 struc multiboot_mod_list
-	.mod_start:				RESB 4
-	.mod_end:				RESB 4
-	.cmdline:				RESB 4
-	.pad:					RESB 4
-	.end:
+    .mod_start:                RESB 4
+    .mod_end:                RESB 4
+    .cmdline:                RESB 4
+    .pad:                    RESB 4
+    .end:
 endstruc

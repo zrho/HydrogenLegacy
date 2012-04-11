@@ -22,25 +22,25 @@ boot16_begin:
 
 ; Entry point for the APs starting in real mode.
 boot16:
-	; Clear cs
-	jmp 0x0:.cs_cleared - boot16_begin + 0x1000
+    ; Clear cs
+    jmp 0x0:.cs_cleared - boot16_begin + 0x1000
 
 .cs_cleared:
-	; Activate A20
-	in al, 0x92
-	or al, 2
-	out 0x92, al
+    ; Activate A20
+    in al, 0x92
+    or al, 2
+    out 0x92, al
 
-	; Load GDT
-	lgdt [cs:gdtr32 - boot16_begin + 0x1000]
+    ; Load GDT
+    lgdt [cs:gdtr32 - boot16_begin + 0x1000]
 
-	; Enable protected mode
-	mov eax, cr0
-	or al, 1
-	mov cr0, eax
+    ; Enable protected mode
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
 
-	; Jump to 32 bit bootstrap
-	jmp 0x8:boot16_trampoline - boot16_begin + 0x1000
+    ; Jump to 32 bit bootstrap
+    jmp 0x8:boot16_trampoline - boot16_begin + 0x1000
 
 gdtr32:
 .Limit: dw 0x17
@@ -53,17 +53,17 @@ gdt32:
 
 bits 32
 boot16_trampoline:
-	; Setup data segment registers
-	mov eax, 0x10
-	mov ds, ax
-	mov es, ax
-	mov fs, ax
-	mov gs, ax
-	mov ss, ax
+    ; Setup data segment registers
+    mov eax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
 
-	; Jump to 32 bit bootstrap
-	mov eax, boot32
-	jmp eax
+    ; Jump to 32 bit bootstrap
+    mov eax, boot32
+    jmp eax
 
 ; Marks the end of the 16 bit boot code
 boot16_end:

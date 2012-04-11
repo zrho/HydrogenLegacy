@@ -23,117 +23,117 @@ bits 64
 
 ; Initializes the SMP system by marking the BSP and starting up the APs.
 smp_init:
-	; Store
-	push rax
-	push rbx
-	push rcx
-	push rsi
-	push rdi
+    ; Store
+    push rax
+    push rbx
+    push rcx
+    push rsi
+    push rdi
 
-	; Mark current processor as BSP and ready
-	call smp_id					; Get current processor's id
-	mov rbx, rax				; Backup id
-	info_proc_addr rdi, rax		; Gets the address of the CPU's descriptor
-	mov rax, INFO_PROC_FLAG_BSP | INFO_PROC_FLAG_READY | INFO_PROC_FLAG_PRESENT
-	add rdi, 2					; Move to flags
-	stosw						; Store flags
+    ; Mark current processor as BSP and ready
+    call smp_id                    ; Get current processor's id
+    mov rbx, rax                ; Backup id
+    info_proc_addr rdi, rax        ; Gets the address of the CPU's descriptor
+    mov rax, INFO_PROC_FLAG_BSP | INFO_PROC_FLAG_READY | INFO_PROC_FLAG_PRESENT
+    add rdi, 2                    ; Move to flags
+    stosw                        ; Store flags
 
-	; Copy 16 bit init code
-	mov rsi, boot16_begin
-	mov rcx, boot16_end - boot16_begin
-	mov rdi, 0x1000
-	call memory_copy
+    ; Copy 16 bit init code
+    mov rsi, boot16_begin
+    mov rcx, boot16_end - boot16_begin
+    mov rdi, 0x1000
+    call memory_copy
 
-	; Iterate over processors
-	xor rcx, rcx
-	xor rsi, rsi
-	mov cl, byte [info_table.proc_count]
-	mov rsi, info_proc
+    ; Iterate over processors
+    xor rcx, rcx
+    xor rsi, rsi
+    mov cl, byte [info_table.proc_count]
+    mov rsi, info_proc
 
 .proc_start:
-	; Load and check flags
-	xor rax, rax
-	mov ax, word [rsi + hydrogen_info_proc.flags]
+    ; Load and check flags
+    xor rax, rax
+    mov ax, word [rsi + hydrogen_info_proc.flags]
 
-	; Processor is present?
-	mov rbx, rax
-	and rbx, INFO_PROC_FLAG_PRESENT
-	cmp rbx, 0
-	je .proc_next
+    ; Processor is present?
+    mov rbx, rax
+    and rbx, INFO_PROC_FLAG_PRESENT
+    cmp rbx, 0
+    je .proc_next
 
-	; Processor is not ready?
-	mov rbx, rax
-	and rbx, INFO_PROC_FLAG_READY
-	cmp rbx, 0
-	jne .proc_next
+    ; Processor is not ready?
+    mov rbx, rax
+    and rbx, INFO_PROC_FLAG_READY
+    cmp rbx, 0
+    jne .proc_next
 
-	; Send init IPI
-	xor rax, rax
-	mov al, byte [rsi + hydrogen_info_proc.apic_id]
-	call lapic_ipi_init
+    ; Send init IPI
+    xor rax, rax
+    mov al, byte [rsi + hydrogen_info_proc.apic_id]
+    call lapic_ipi_init
 
-	; Wait for a moment
-	push rcx
-	mov rcx, 5			; 5 ticks should suffice
-	call wait_ticks
-	pop rcx
+    ; Wait for a moment
+    push rcx
+    mov rcx, 5            ; 5 ticks should suffice
+    call wait_ticks
+    pop rcx
 
-	; Send startup IPI
-	call lapic_ipi_startup
+    ; Send startup IPI
+    call lapic_ipi_startup
 
-	; Wait for processor to become ready
+    ; Wait for processor to become ready
 .wait_for_ready:
-	xor rax, rax
-	mov ax, word [rsi + hydrogen_info_proc.flags]
-	and rax, INFO_PROC_FLAG_READY
-	cmp rax, 0
-	je .wait_for_ready
+    xor rax, rax
+    mov ax, word [rsi + hydrogen_info_proc.flags]
+    and rax, INFO_PROC_FLAG_READY
+    cmp rax, 0
+    je .wait_for_ready
 
-	; Redirect the PIT to the BSP again, as it is needed
-	; for the next wait and must be directed to the BSP
-	; in the end anyway.
-	call pit_redirect
+    ; Redirect the PIT to the BSP again, as it is needed
+    ; for the next wait and must be directed to the BSP
+    ; in the end anyway.
+    call pit_redirect
 
-	; Print message
-	push rsi					; Save rsi
-	mov rsi, message_ap_started
-	call screen_write
-	pop rsi
+    ; Print message
+    push rsi                    ; Save rsi
+    mov rsi, message_ap_started
+    call screen_write
+    pop rsi
 
 .proc_next:
-	; Next processor available?
-	add rsi, hydrogen_info_proc.end		; Advance to next processor structure
-	dec rcx								; Decrease count of remaining processors
-	cmp rcx, 0							; Processor left?
-	jne .proc_start
+    ; Next processor available?
+    add rsi, hydrogen_info_proc.end        ; Advance to next processor structure
+    dec rcx                                ; Decrease count of remaining processors
+    cmp rcx, 0                            ; Processor left?
+    jne .proc_start
 
-	; Restore
-	pop rdi
-	pop rsi
-	pop rcx
-	pop rbx
-	pop rax
-	ret
+    ; Restore
+    pop rdi
+    pop rsi
+    pop rcx
+    pop rbx
+    pop rax
+    ret
 
 smp_init_ap:
-	; Store
-	push rax
-	push rdi
+    ; Store
+    push rax
+    push rdi
 
-	; Get the current processor's descriptor
-	call smp_id
-	info_proc_addr rdi, rax
+    ; Get the current processor's descriptor
+    call smp_id
+    info_proc_addr rdi, rax
 
-	; Write ready flag
-	xor rax, rax
-	mov ax, [rdi + hydrogen_info_proc.flags]
-	or rax, INFO_PROC_FLAG_READY
-	mov word [rdi + hydrogen_info_proc.flags], ax
+    ; Write ready flag
+    xor rax, rax
+    mov ax, [rdi + hydrogen_info_proc.flags]
+    or rax, INFO_PROC_FLAG_READY
+    mov word [rdi + hydrogen_info_proc.flags], ax
 
-	; Restore
-	pop rdi
-	pop rax
-	ret
+    ; Restore
+    pop rdi
+    pop rax
+    ret
 
 ;-------------------------------------------------------------------------------
 ; SMP - LAPIC
@@ -142,18 +142,18 @@ smp_init_ap:
 ; Returns the current processor's apic id.
 ;
 ; Returns:
-; 	rax The current processor's apic id.
+;     rax The current processor's apic id.
 smp_id:
-	; Store
-	push rsi
+    ; Store
+    push rsi
 
-	; Load id
-	xor rax, rax
-	mov rsi, qword [info_table.lapic_paddr]
-	add rsi, LAPIC_ID_OFFSET
-	mov eax, dword [rsi]
-	shr rax, 24
+    ; Load id
+    xor rax, rax
+    mov rsi, qword [info_table.lapic_paddr]
+    add rsi, LAPIC_ID_OFFSET
+    mov eax, dword [rsi]
+    shr rax, 24
 
-	; Restore
-	pop rsi
-	ret
+    ; Restore
+    pop rsi
+    ret

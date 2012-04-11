@@ -27,22 +27,22 @@ bits 64
 ; accordingly.
 ;
 ; Returns:
-;	rax Allocated frame of memory.
+;    rax Allocated frame of memory.
 frame_alloc:
-	; Store
-	push rbx
-	push rdi
+    ; Store
+    push rbx
+    push rdi
 
-	; Load address
-	mov rdi, info_table.free_mem_begin
-	mov rax, qword [rdi]
+    ; Load address
+    mov rdi, info_table.free_mem_begin
+    mov rax, qword [rdi]
 
-	; Update field
-	mov rbx, rax
-	add rbx, 0x1000
-	mov qword [rdi], rbx
+    ; Update field
+    mov rbx, rax
+    add rbx, 0x1000
+    mov qword [rdi], rbx
 
-	; Restore
-	pop rdi
-	pop rbx
-	ret
+    ; Restore
+    pop rdi
+    pop rbx
+    ret

@@ -18,12 +18,12 @@
 ; Paging - Flags
 ;-------------------------------------------------------------------------------
 
-%define PAGE_FLAG_PRESENT			(1 << 0)
-%define PAGE_FLAG_WRITABLE			(1 << 1)
-%define PAGE_FLAG_USER				(1 << 2)
-%define PAGE_FLAG_GLOBAL			(1 << 6)
-%define PAGE_FLAG_PS				(1 << 7)
+%define PAGE_FLAG_PRESENT            (1 << 0)
+%define PAGE_FLAG_WRITABLE            (1 << 1)
+%define PAGE_FLAG_USER                (1 << 2)
+%define PAGE_FLAG_GLOBAL            (1 << 6)
+%define PAGE_FLAG_PS                (1 << 7)
 
-%define PAGE_FLAG_PW				PAGE_FLAG_PRESENT | PAGE_FLAG_WRITABLE
+%define PAGE_FLAG_PW                PAGE_FLAG_PRESENT | PAGE_FLAG_WRITABLE
 
-%define PAGE_PHYSICAL_MASK			~0x1FF
+%define PAGE_PHYSICAL_MASK            ~0x1FF

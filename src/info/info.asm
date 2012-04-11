@@ -23,21 +23,21 @@ bits 64
 
 ; Prepares the info table by writing default data.
 info_prepare:
-	; Store
-	push rax
-	push rdi
+    ; Store
+    push rax
+    push rdi
 
-	; Write default IRQ to GSI mapping
-	xor rax, rax
-	mov rdi, info_table.irq_to_gsi
+    ; Write default IRQ to GSI mapping
+    xor rax, rax
+    mov rdi, info_table.irq_to_gsi
 
 .irq2gsi_next:
-	stosd
-	inc rax
-	cmp rax, IRQ_COUNT
-	jl .irq2gsi_next
+    stosd
+    inc rax
+    cmp rax, IRQ_COUNT
+    jl .irq2gsi_next
 
-	; Restore
-	pop rdi
-	pop rax
-	ret
+    ; Restore
+    pop rdi
+    pop rax
+    ret

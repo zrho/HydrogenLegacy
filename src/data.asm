@@ -39,22 +39,22 @@ config_table: dq config_table_default
 
 ; Default config table
 config_table_default:
-	dd HYDROGEN_CONFIG_MAGIC
-	dd 0
-	dq 0
-	dq config_irq_table_default
-	db LAPIC_TIMER_VECTOR
-	dq 0
-	dq 0
+    dd HYDROGEN_CONFIG_MAGIC
+    dd 0
+    dq 0
+    dq config_irq_table_default
+    db LAPIC_TIMER_VECTOR
+    dq 0
+    dq 0
 
 ; Default IRQ table
 config_irq_table_default:
-	%assign i 0
-	%rep 16
-		db (IRQ_VECTOR + i)
-		db HYDROGEN_CONFIG_IRQ_FLAG_MASK
-  		%assign i i+1
-	%endrep
+    %assign i 0
+    %rep 16
+        db (IRQ_VECTOR + i)
+        db HYDROGEN_CONFIG_IRQ_FLAG_MASK
+          %assign i i+1
+    %endrep
 
 ;-------------------------------------------------------------------------------
 ; Info Table
@@ -70,16 +70,16 @@ info_string_offset: dq 0x1
 ; The pointer to the system's IDT.
 sys_idtr64:
 .length:
-	dw 0xFFF
+    dw 0xFFF
 .pointer:
-	dq sys_idt64
+    dq sys_idt64
 
 ; The pointer to the system's 64 bit GDT.
 sys_gdtr64:
 .length:
-	dw 0x27
+    dw 0x27
 .pointer:
-	dq sys_gdt64
+    dq sys_gdt64
 
 ;-------------------------------------------------------------------------------
 ; Kernel
@@ -102,23 +102,23 @@ kernel_symbol_config: dq "hydrogen_config", 0
 ;-------------------------------------------------------------------------------
 
 message_header:
-	db "Hydrogen v0.1b - http://github.com/farok/Hydrogen", CHAR_NL
-	db "Copyright (c) 2011 by Lukas Heidemann", CHAR_NL
-	db "-------------------------------------------------", CHAR_NL
-	db "Initializing the system...", CHAR_NL, 0
+    db "Hydrogen v0.1b - http://github.com/farok/Hydrogen", CHAR_NL
+    db "Copyright (c) 2011 by Lukas Heidemann", CHAR_NL
+    db "-------------------------------------------------", CHAR_NL
+    db "Initializing the system...", CHAR_NL, 0
 
 message_ap_started:
-	db "Application Processor started.", CHAR_NL, 0
+    db "Application Processor started.", CHAR_NL, 0
 
 message_no_kernel:
-	db "PANIC: No kernel binary could be found. Make sure to pass "
-	db "the kernel as a module with cmdline beginning with 'kernel64'.", 0
+    db "PANIC: No kernel binary could be found. Make sure to pass "
+    db "the kernel as a module with cmdline beginning with 'kernel64'.", 0
 
 message_kernel_broken:
-	db "PANIC: Kernel binary is no executable, little-endian ELF64 file.", 0
+    db "PANIC: Kernel binary is no executable, little-endian ELF64 file.", 0
 
 message_kernel:
-	db "Starting kernel...", 0
+    db "Starting kernel...", 0
 
 ;-------------------------------------------------------------------------------
 ; Misc
@@ -132,8 +132,8 @@ pit_irq: db 0x0
 
 ; Cursor positions for the screen
 screen:
-	.cursor_x: dw 0x0
-	.cursor_y: dw 0x0
+    .cursor_x: dw 0x0
+    .cursor_y: dw 0x0
 
 ; When an AP entry point is given, APs will spin on this value before they
 ; enter the kernel, until it is set to 1.

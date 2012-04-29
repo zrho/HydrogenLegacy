@@ -24,9 +24,9 @@ bits 64
 ; 64 bit entry point for the BSP.
 boot64_bsp:
     ; Prepare
-    cli                                        ; Clear interrupts
-    and rsp, ~0xFFF                            ; Reset stack
-    mov ax, 0x10                            ; Load data segment selectors
+    cli                                         ; Clear interrupts
+    and rsp, ~0xFFF                             ; Reset stack
+    mov ax, 0x10                                ; Load data segment selectors
     mov ds, ax
     mov gs, ax
     mov fs, ax
@@ -38,48 +38,48 @@ boot64_bsp:
     call screen_write
 
     ; Initialize the info tables
-    call info_prepare                        ; Prepare the info structure
-    call multiboot_parse                    ; Parse multiboot tables
-    call acpi_parse                            ; Parse ACPI tables
+    call info_prepare                           ; Prepare the info structure
+    call multiboot_parse                        ; Parse multiboot tables
+    call acpi_parse                             ; Parse ACPI tables
 
-    call modules_sort                        ; Sort the modules (for moving)
-    call modules_move                        ; Move modules to new location
+    call modules_sort                           ; Sort the modules (for moving)
+    call modules_move                           ; Move modules to new location
 
     ; Load the kernel
-    call kernel_find                        ; Search for the kernel
-    call kernel_load                        ; Load the kernel
-    call kernel_inspect                        ; Inspect the kernel binary
+    call kernel_find                            ; Search for the kernel
+    call kernel_load                            ; Load the kernel
+    call kernel_inspect                         ; Inspect the kernel binary
 
-    call kernel_map_info                    ; Maps the info tables
-    call kernel_map_stacks                    ; Maps the stacks
+    call kernel_map_info                        ; Maps the info tables
+    call kernel_map_stacks                      ; Maps the stacks
 
     ; Initialize interrupt handling
-    call int_init                            ; Initialize IDT
-    call int_load                            ; Load IDT
+    call int_init                               ; Initialize IDT
+    call int_load                               ; Load IDT
 
     ; Prepare TSS
-    call tss_init                            ; Write and load TSS
+    call tss_init                               ; Write and load TSS
 
     ; Initialize interrupt controllers and IRQs
-    call lapic_enable                        ; Enable the LAPIC
-    call lapic_timer_lvt_calc                ; Calculate the LVT for the timer
-    call pic_init                            ; Initialize the 8259 PIC
-    call ioapic_init                        ; Initialize all I/O APICs
-    call irq_wire                            ; Wire IRQs
+    call lapic_enable                           ; Enable the LAPIC
+    call lapic_timer_lvt_calc                   ; Calculate the LVT for the timer
+    call pic_init                               ; Initialize the 8259 PIC
+    call ioapic_init                            ; Initialize all I/O APICs
+    call irq_wire                               ; Wire IRQs
 
     ; Initialize the PIT
-    call pit_init                            ; Initialize the PIT
-    call pit_enable                            ; Enable the PIT
+    call pit_init                               ; Initialize the PIT
+    call pit_enable                             ; Enable the PIT
 
     ; Initialization with interrupts enabled
-    sti                                        ; Enable interrupts
-    call lapic_timer_calibrate                ; Calibrate the LAPIC timer
-    call smp_init                            ; Initialize SMP
-    cli                                        ; Disable interrupts
+    sti                                         ; Enable interrupts
+    call lapic_timer_calibrate                  ; Calibrate the LAPIC timer
+    call smp_init                               ; Initialize SMP
+    cli                                         ; Disable interrupts
 
     ; Prepare IRQs for kernel
-    call pit_disable                        ; Disable the PIT again (not used anymore)
-    call irq_set_masks                        ; Set IRQ masks
+    call pit_disable                            ; Disable the PIT again (not used anymore)
+    call irq_set_masks                          ; Set IRQ masks
 
     ; Reload stack
     call boot64_reload_stack
@@ -87,7 +87,7 @@ boot64_bsp:
     ; Jump to the kernel
     mov rsi, message_kernel
     call screen_write
-    mov byte [entry_barrier], 1                ; Open barrier
+    mov byte [entry_barrier], 1                 ; Open barrier
 
     mov rax, kernel_entry
     mov rax, qword [rax]
@@ -96,18 +96,18 @@ boot64_bsp:
 ; 64 bit entry point for APs.
 boot64_ap:
     ; Prepare
-    cli                                    ; Clear interrupts
-    and rsp, ~0xFFF                        ; Reset stack
+    cli                                         ; Clear interrupts
+    and rsp, ~0xFFF                             ; Reset stack
 
     ; Initialize
-    call int_load                        ; Load IDT
-    call lapic_enable                    ; Enable the LAPIC
-    call pit_redirect                    ; Redirect the PIT to this processor
-    call tss_init                        ; Write and load TSS
+    call int_load                               ; Load IDT
+    call lapic_enable                           ; Enable the LAPIC
+    call pit_redirect                           ; Redirect the PIT to this processor
+    call tss_init                               ; Write and load TSS
 
     ; Initialization with interrupts
     sti
-    call lapic_timer_calibrate            ; Calibrate the LAPIC timer
+    call lapic_timer_calibrate                  ; Calibrate the LAPIC timer
     cli
 
     ; Finalize AP initialization

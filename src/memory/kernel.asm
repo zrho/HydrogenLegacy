@@ -157,8 +157,8 @@ kernel_inspect_strtbl:
     push rax
 
     ; Set the string table address
-    mov rax, qword [rsi + elf64_shdr.sh_offset]        ; Offset into file
-    add rax, rdx                                    ; Address
+    mov rax, qword [rsi + elf64_shdr.sh_offset]         ; Offset into file
+    add rax, rdx                                        ; Address
     mov qword [kernel_string_table], rax
 
     ; Restore
@@ -179,12 +179,12 @@ kernel_inspect_symtbl:
     push rdi
 
     ; Get address of symbols and end address of symbol table
-    mov rbx, qword [rsi + elf64_shdr.sh_offset]        ; Offset into file
-    add rbx, rdx                                    ; Address
+    mov rbx, qword [rsi + elf64_shdr.sh_offset]         ; Offset into file
+    add rbx, rdx                                        ; Address
 
-    mov rcx, qword [rsi + elf64_shdr.sh_size]        ; Size of the section
-    add rcx, rbx                                    ; End of symbol table
-    mov rsi, rbx                                    ; Address of symbols
+    mov rcx, qword [rsi + elf64_shdr.sh_size]           ; Size of the section
+    add rcx, rbx                                        ; End of symbol table
+    mov rsi, rbx                                        ; Address of symbols
 
     ; No symbol?
     cmp rcx, 0

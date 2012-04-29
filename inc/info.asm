@@ -22,20 +22,20 @@
 %define INFO_FLAG_PIC (1 << 0)
 
 ; Constants specifying an ISA IRQ's polarity (in its flags)
-%define INFO_IRQ_POLARITY_OFFSET    0
-%define INFO_IRQ_POLARITY_MASK        11b
+%define INFO_IRQ_POLARITY_OFFSET        0
+%define INFO_IRQ_POLARITY_MASK          11b
 
-%define INFO_IRQ_POLARITY_DEFAULT    00b
-%define INFO_IRQ_POLARITY_LOW        11b
-%define INFO_IRQ_POLARITY_HIGH        01b
+%define INFO_IRQ_POLARITY_DEFAULT       00b
+%define INFO_IRQ_POLARITY_LOW           11b
+%define INFO_IRQ_POLARITY_HIGH          01b
 
 ; Constants specifying an ISA IRQ's trigger mode (in its flags)
-%define INFO_IRQ_TRIGGER_OFFSET        2
-%define INFO_IRQ_TRIGGER_MASK        11b
+%define INFO_IRQ_TRIGGER_OFFSET         2
+%define INFO_IRQ_TRIGGER_MASK           11b
 
-%define INFO_IRQ_TRIGGER_DEFAULT    00b
-%define INFO_IRQ_TRIGGER_EDGE        01b
-%define INFO_IRQ_TRIGGER_LEVEL        11b
+%define INFO_IRQ_TRIGGER_DEFAULT        00b
+%define INFO_IRQ_TRIGGER_EDGE           01b
+%define INFO_IRQ_TRIGGER_LEVEL          11b
 
 ; Main info structure containing important information about the system.
 ;
@@ -51,16 +51,16 @@
 ; .irq_to_gsi        ISA IRQ to global system interrupt mappings.
 ; .irq_flags        Flags for handling the ISA IRQs (one entry for each).
 %macro __hydrogen_info_table 0
-    .free_mem_begin:    RESB 8
-    .command_line:        RESB 8
-    .lapic_paddr:        RESB 8
-    .flags:                RESB 1
-    .proc_count:        RESB 1
-    .mod_count:            RESB 1
-    .mmap_count:        RESB 1
-    .ioapic_count:        RESB 1
-    .irq_to_gsi:        RESB 4 * 16
-    .irq_flags:            RESB 1 * 16
+    .free_mem_begin:            RESB    8
+    .command_line:              RESB    8
+    .lapic_paddr:               RESB    8
+    .flags:                     RESB    1
+    .proc_count:                RESB    1
+    .mod_count:                 RESB    1
+    .mmap_count:                RESB    1
+    .ioapic_count:              RESB    1
+    .irq_to_gsi:                RESB    4 * 16
+    .irq_flags:                 RESB    1 * 16
     .end:
 %endmacro
 
@@ -72,8 +72,8 @@ endstruc
 ; Info Table - Processor
 ;-------------------------------------------------------------------------------
 
-%define INFO_PROC_FLAG_PRESENT    (1 << 0)
-%define INFO_PROC_FLAG_BSP        (1 << 1)
+%define INFO_PROC_FLAG_PRESENT  (1 << 0)
+%define INFO_PROC_FLAG_BSP      (1 << 1)
 %define INFO_PROC_FLAG_READY    (1 << 2)
 
 ; Info structure describing a processor.
@@ -83,9 +83,9 @@ endstruc
 ; .flags         Flags.
 ; .lapic_freq    Ticks of the LAPIC timer per second.
 struc hydrogen_info_proc
-    .acpi_id:                    RESB    1
-    .apic_id:                    RESB    1
-    .flags:                        RESB    2
+    .acpi_id:                   RESB    1
+    .apic_id:                   RESB    1
+    .flags:                     RESB    2
     .lapic_freq:                RESB    4
     .end:
 endstruc
@@ -101,9 +101,9 @@ endstruc
 ; .int_base
 struc hydrogen_info_ioapic
     .id:                        RESB    1
-    .address:                    RESB    4
-    .int_base:                    RESB     4
-    .int_count:                    RESB     1    ; TODO: Determine this (max redir)
+    .address:                   RESB    4
+    .int_base:                  RESB    4
+    .int_count:                 RESB    1    ; TODO: Determine this (max redir)
     .end:
 endstruc
 
@@ -117,8 +117,8 @@ endstruc
 ; .length        The length of the module in bytes.
 ; .cmdline        The path of the module file and its arguments (offset in strings)
 struc hydrogen_info_mod
-    .begin                        RESB    8
-    .length                        RESB     8
+    .begin                      RESB    8
+    .length                     RESB    8
     .cmdline                    RESB    8
     .end:
 endstruc
@@ -134,7 +134,7 @@ endstruc
 ; .available    One, if the section is available for free usage; zero otherwise.
 struc hydrogen_info_mmap
     .begin                        RESB    8
-    .length                        RESB    8
+    .length                       RESB    8
     .available                    RESB    1
     .end:
 endstruc

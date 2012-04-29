@@ -34,20 +34,20 @@ string_length:
     push rsi
 
     ; Increment counter until nul-byte is reached
-    xor rcx, rcx                    ; Counter
-    xor rax, rax                    ; Register for current byte
+    xor rcx, rcx                        ; Counter
+    xor rax, rax                        ; Register for current byte
 
 .next:
-    lodsb                            ; Load byte
-    cmp rax, 0                        ; Null byte?
+    lodsb                               ; Load byte
+    cmp rax, 0                          ; Null byte?
     je .null
 
-    inc rcx                            ; Increment counter
-    jmp .next                        ; Next character
+    inc rcx                             ; Increment counter
+    jmp .next                           ; Next character
 
 .null:
     ; Restore
-    xchg rax, rcx                    ; Counter in rax
+    xchg rax, rcx                       ; Counter in rax
     pop rsi
     pop rcx
     ret
@@ -66,13 +66,13 @@ string_copy:
     push rsi
 
     ; Copy bytes until nul-byte is reached
-    xor rax, rax                    ; Register for current byte
+    xor rax, rax                        ; Register for current byte
 
 .next:
-    lodsb                            ; Load
-    stosb                            ; and write
+    lodsb                               ; Load
+    stosb                               ; and write
 
-    cmp rax, 0                        ; Null byte?
+    cmp rax, 0                          ; Null byte?
     jne .next
 
 .null:
@@ -97,11 +97,11 @@ string_equal:
     push rdi
 
     ; Get length for both strings
-    call string_length                    ; First string
+    call string_length                  ; First string
 
     xchg rsi, rdi
     xchg rax, rbx
-    call string_length                    ; Second string
+    call string_length                  ; Second string
 
     ; Equal length?
     cmp rax, rbx

@@ -38,8 +38,8 @@ modules_move:
 
     ; Load list address and module count
     xor rcx, rcx
-    mov cl, byte [info_table.mod_count]        ; Get module count
-    mov rsi, info_mods                        ; Get module list address
+    mov cl, byte [info_table.mod_count]         ; Get module count
+    mov rsi, info_mods                          ; Get module list address
 
     ; No modules?
     cmp rcx, 0
@@ -47,25 +47,25 @@ modules_move:
 
 .next_module:
     ; Move module
-    align_page rdi                            ; Page align rdi
-    push rcx                                ; Store rcx and rsi for the call
-    push rsi                                ; to memory_copy
-    mov rcx, qword [rsi + hydrogen_info_mod.length]    ; Load length
-    mov rsi, qword [rsi + hydrogen_info_mod.begin]    ; Load address
-    ;call memory_copy                        ; Copy the module to the new address
-    mov rbx, rdi                            ; Back up the module's new address
-    add rdi, rcx                            ; Add the module's length to the
-                                            ; destination buffer
-    pop rsi                                    ; Restore rsi
-    pop rcx                                    ; Restore rcx
+    align_page rdi                                  ; Page align rdi
+    push rcx                                        ; Store rcx and rsi for the call
+    push rsi                                        ; to memory_copy
+    mov rcx, qword [rsi + hydrogen_info_mod.length] ; Load length
+    mov rsi, qword [rsi + hydrogen_info_mod.begin]  ; Load address
+    ;call memory_copy                               ; Copy the module to the new address
+    mov rbx, rdi                                    ; Back up the module's new address
+    add rdi, rcx                                    ; Add the module's length to the
+                                                    ; destination buffer
+    pop rsi                                         ; Restore rsi
+    pop rcx                                         ; Restore rcx
 
     ; Write the module's new address to the descriptor
     mov qword [rsi + hydrogen_info_mod.begin], rbx
 
     ; Next module?
-    add rsi, 24                                ; Advance to next module
-    dec rcx                                    ; Decrease remaining mod count
-    cmp rcx, 0                                ; Module left?
+    add rsi, 24                                     ; Advance to next module
+    dec rcx                                         ; Decrease remaining mod count
+    cmp rcx, 0                                      ; Module left?
     jne .next_module
 
 .end:
@@ -90,8 +90,8 @@ modules_sort:
 
     ; Load list address and module count
     xor rcx, rcx
-    mov cl, byte [info_table.mod_count]        ; Get module count
-    mov rsi, info_mods                        ; Get module list address
+    mov cl, byte [info_table.mod_count]         ; Get module count
+    mov rsi, info_mods                          ; Get module list address
 
     ; No modules?
     cmp rcx, 0
@@ -99,16 +99,16 @@ modules_sort:
 
 .next_run:
     ; Find first module and swap with first in list
-    mov rbx, rsi                    ; Backup rsi
-    call modules_first                ; Get first module's address
-    mov rdi, rbx                    ; Beginning of list to rdi for swap
-    call modules_swap                ; Swap modules at rsi and rdi
-    mov rsi, rbx                    ; Restore rsi
+    mov rbx, rsi                                ; Backup rsi
+    call modules_first                          ; Get first module's address
+    mov rdi, rbx                                ; Beginning of list to rdi for swap
+    call modules_swap                           ; Swap modules at rsi and rdi
+    mov rsi, rbx                                ; Restore rsi
 
     ; Next module?
-    add rsi, 24                        ; Advance to next entry
-    dec rcx                            ; Decrease remaining modules count
-    cmp rcx, 0                        ; No module left?
+    add rsi, 24                                 ; Advance to next entry
+    dec rcx                                     ; Decrease remaining modules count
+    cmp rcx, 0                                  ; No module left?
     jne .next_run
 
 .restore:
@@ -130,9 +130,9 @@ modules_sort:
 ;    rsi The address of the first module.
 modules_first:
     ; No module left?
-    cmp rcx, 0                    ; No module left (module count zero)?
+    cmp rcx, 0                      ; No module left (module count zero)?
     jne .begin
-    xor rsi, rsi                ; Return null pointer
+    xor rsi, rsi                    ; Return null pointer
     ret
 
 .begin:
@@ -143,14 +143,14 @@ modules_first:
     push rdx
 
     ; Find first
-    mov rdx, 0xffffffff         ; The start address of the first module.
-    xor rbx, rbx                ; The address of the first module's entry
+    mov rdx, 0xffffffff             ; The start address of the first module.
+    xor rbx, rbx                    ; The address of the first module's entry
 
 .next:
     ; Get start address and compare
-    lodsq                        ; Load start address
-    sub rsi, 8                    ; Roll back to beginning of mod entry
-    cmp rax, rdx                ; Address smaller?
+    lodsq                           ; Load start address
+    sub rsi, 8                      ; Roll back to beginning of mod entry
+    cmp rax, rdx                    ; Address smaller?
     jl .smaller
     jmp .prepare_next
 
@@ -162,9 +162,9 @@ modules_first:
     ; Fall through
 .prepare_next:
     ; Advance to next entry
-    add rsi, 24                    ; Advance to next entry
-    dec rcx                        ; Decrease remaining count
-    cmp rcx, 0                    ; Module left?
+    add rsi, 24                     ; Advance to next entry
+    dec rcx                         ; Decrease remaining count
+    cmp rcx, 0                      ; Module left?
     jne .next
 
     ; Return smallest

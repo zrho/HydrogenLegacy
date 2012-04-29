@@ -27,8 +27,8 @@ pic_init:
     push rax
 
     ; Check if PIC is present
-    mov al, byte [info_table.flags]            ; Load flags
-    and al, INFO_FLAG_PIC                    ; Check PIC flag
+    mov al, byte [info_table.flags]         ; Load flags
+    and al, INFO_FLAG_PIC                   ; Check PIC flag
     cmp al, 0
     jne .pic_present
 

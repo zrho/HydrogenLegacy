@@ -18,5 +18,5 @@
 ; IRQ
 ;-------------------------------------------------------------------------------
 
-%define IRQ_VECTOR    0x30
-%define IRQ_COUNT    16
+%define IRQ_VECTOR  0x30
+%define IRQ_COUNT   16

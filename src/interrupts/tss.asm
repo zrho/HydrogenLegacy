@@ -27,18 +27,18 @@ tss_init:
     push rdi
 
     ; Get address of TSS
-    call smp_id                    ; Get LAPIC id
-    mov rbx, rax                ; Store id
-    shl rax, 7                    ; Multiply with 128
-    add rax, sys_tss64            ; TSS base
+    call smp_id                     ; Get LAPIC id
+    mov rbx, rax                    ; Store id
+    shl rax, 7                      ; Multiply with 128
+    add rax, sys_tss64              ; TSS base
     mov rdx, rax
 
     ; Get address of TSS pointer in GDT
-    mov rax, rbx                ; Get id
-    shl rax, 4                    ; Multiply with 16
-    add rax, 5 * 8                ; 5 selectors before TSS pointers
-    mov rbx, rax                ; Backup selector
-    add rax, sys_gdt64            ; GDT base
+    mov rax, rbx                    ; Get id
+    shl rax, 4                      ; Multiply with 16
+    add rax, 5 * 8                  ; 5 selectors before TSS pointers
+    mov rbx, rax                    ; Backup selector
+    add rax, sys_gdt64              ; GDT base
     mov rdi, rax
 
     ; Create TSS pointer
@@ -55,7 +55,7 @@ tss_init:
 
     ; Update GDT size
     mov rax, rbx
-    add rax, 16 - 1            ; limit = size - 1 = offset + 16 - 1
+    add rax, 16 - 1                 ; limit = size - 1 = offset + 16 - 1
     mov word [sys_gdtr64.length], ax
 
     ; Reload GDT

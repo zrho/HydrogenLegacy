@@ -28,10 +28,10 @@ bits 64
 ; PML0    Page
 
 struc page_index_group
-    .pte                RESB 2
-    .pde                RESB 2
-    .pdpe                RESB 2
-    .pml4e                 RESB 2
+    .pte                    RESB 2
+    .pde                    RESB 2
+    .pdpe                   RESB 2
+    .pml4e                  RESB 2
     .end:
 endstruc
 
@@ -58,17 +58,17 @@ page_map:
     or rax, PAGE_FLAG_PRESENT
 
     ; Calculate the index group
-    sub rsp, page_index_group.end        ; Place to put the index group
-    mov r8, rax                        ; Backup rax
+    sub rsp, page_index_group.end           ; Place to put the index group
+    mov r8, rax                             ; Backup rax
     mov rdi, rsp
     mov rax, rsi
     call page_index_group_calc
     mov rax, r8
 
     ; Create containg tables and set PTE
-    mov rbx, cr3        ; Load PML4
-    mov rsi, rbx        ; And use it as parent structure
-    mov rcx, 3            ; Begin with PDP
+    mov rbx, cr3                            ; Load PML4
+    mov rsi, rbx                            ; And use it as parent structure
+    mov rcx, 3                              ; Begin with PDP
     call page_create_and_set
 
     ; Remove index group from stack
@@ -101,15 +101,15 @@ page_create_and_set:
 
     ; Get index for level
     mov rbx, rcx
-    shl rbx, 1                ; level * 2 to get offset in index group
-    add rbx, rdi            ; + base address of index group
+    shl rbx, 1                  ; level * 2 to get offset in index group
+    add rbx, rdi                ; + base address of index group
     mov bx, word [rbx]
     and rbx, 0xFFFF
 
     ; Get entry in parent table
-    shl rbx, 3                ; index * 8 to get offset in parent table
-    add rbx, rsi            ; + base address of parent table
-    mov rdx, qword [rbx]    ; Load entry
+    shl rbx, 3                  ; index * 8 to get offset in parent table
+    add rbx, rsi                ; + base address of parent table
+    mov rdx, qword [rbx]        ; Load entry
 
     ; Check page model level
     cmp rcx, 0
@@ -132,7 +132,7 @@ page_create_and_set:
     mov rbx, qword [rbx]            ; Get current level's structure
     and rbx, PAGE_PHYSICAL_MASK
     mov rsi, rbx                    ; and use it as the parent table
-    dec rcx                            ; Advance to lower level
+    dec rcx                         ; Advance to lower level
     call page_create_and_set        ; Recurse
 
 .end:

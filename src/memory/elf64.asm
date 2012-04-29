@@ -83,17 +83,17 @@ elf64_load_segment:
     ; Infer page flags
     mov rdx, PAGE_FLAG_PRESENT | PAGE_FLAG_GLOBAL
 
-    mov eax, dword [rsi + elf64_phdr.p_flags]    ; Check if writable
+    mov eax, dword [rsi + elf64_phdr.p_flags]       ; Check if writable
     and rax, ELF_PF_W
     cmp rax, 0
     je .not_writable
-    or rdx, PAGE_FLAG_WRITABLE                    ; Is writable
+    or rdx, PAGE_FLAG_WRITABLE                      ; Is writable
 
 .not_writable:
     ; Allocate frames and map them
-    xor rbx, rbx                                ; Offset into the segment
-    mov rcx, qword [rsi + elf64_phdr.p_memsz]    ; Memory size of the segment
-    mov rdi, qword [rsi + elf64_phdr.p_vaddr]    ; Virtual address to map to
+    xor rbx, rbx                                    ; Offset into the segment
+    mov rcx, qword [rsi + elf64_phdr.p_memsz]       ; Memory size of the segment
+    mov rdi, qword [rsi + elf64_phdr.p_vaddr]       ; Virtual address to map to
 
     ; No frames?
     cmp rcx, 0
@@ -121,10 +121,10 @@ elf64_load_segment:
 
 .frame_end:
     ; Copy bytes
-    mov rdi, qword [rsi + elf64_phdr.p_vaddr]    ; Destination to copy to
-    mov rbx, qword [rsi + elf64_phdr.p_offset]    ; Offset of source in file
-    add rbx, r8                                 ; Source to copy from
-    mov rcx, qword [rsi + elf64_phdr.p_filesz]    ; Number of bytes to copy
+    mov rdi, qword [rsi + elf64_phdr.p_vaddr]       ; Destination to copy to
+    mov rbx, qword [rsi + elf64_phdr.p_offset]      ; Offset of source in file
+    add rbx, r8                                     ; Source to copy from
+    mov rcx, qword [rsi + elf64_phdr.p_filesz]      ; Number of bytes to copy
 
     ; Nothing to copy?
     cmp rcx, 0
@@ -145,12 +145,12 @@ elf64_load_segment:
 
 .copy_end:
     ; Clear remaining part of the segment
-    mov rcx, qword [rsi + elf64_phdr.p_memsz]    ; Full size of segment
-    mov rax, qword [rsi + elf64_phdr.p_filesz]    ; Size of data part
-    mov rdi, qword [rsi + elf64_phdr.p_vaddr]    ; Address of segment
+    mov rcx, qword [rsi + elf64_phdr.p_memsz]       ; Full size of segment
+    mov rax, qword [rsi + elf64_phdr.p_filesz]      ; Size of data part
+    mov rdi, qword [rsi + elf64_phdr.p_vaddr]       ; Address of segment
 
-    add rdi, rax                                ; Address of clear part
-    sub rcx, rax                                ; Size of clear part
+    add rdi, rax                                    ; Address of clear part
+    sub rcx, rax                                    ; Size of clear part
 
     xor rax, rax
     rep stosb
@@ -183,9 +183,9 @@ elf64_section_foreach:
 
     ; Get section header address and count
     xor rcx, rcx
-    mov rbx, qword [rsi + elf64_ehdr.e_shoff]    ; Section header offset
-    add rbx, rsi                                ; Section header address
-    mov cx, word [rsi + elf64_ehdr.e_shnum]        ; Number of section headers
+    mov rbx, qword [rsi + elf64_ehdr.e_shoff]       ; Section header offset
+    add rbx, rsi                                    ; Section header address
+    mov cx, word [rsi + elf64_ehdr.e_shnum]         ; Number of section headers
 
     ; No sections?
     cmp rcx, 0

@@ -29,7 +29,7 @@ int_init:
     push rdi
 
     ; Clear IDT
-    mov rdi, sys_idt64                    ; Load idt address
+    mov rdi, sys_idt64                  ; Load idt address
     mov rcx, 512                        ; 4kB = 512 * 8 byte
     xor rax, rax                        ; Fill with zeroes
     rep stosq

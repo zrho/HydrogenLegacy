@@ -26,38 +26,38 @@
 ;
 ; .magic        A magic number (CONFIG_MAGIC).
 ; .flags        Flags.
-; .ap_entry        Entry point for application processors or
-;                zero (0) to hlt them.
+; .ap_entry     Entry point for application processors or
+;               zero (0) to hlt them.
 ; .irq_table    Pointer to the IRQ table (16 entries) or
-;                zero (0) for defaults.
+;               zero (0) for defaults.
 ; .lapic_tmrvec Vector for the LAPIC timer.
-; .info_vaddr    The virtual address to map the info table
-;                to or zero (0), if it should not be mapped.
-; .stack_vaddr    The virtual address to map the stacks to
-;                or zero (0), if they should not be mapped.
+; .info_vaddr   The virtual address to map the info table
+;               to or zero (0), if it should not be mapped.
+; .stack_vaddr  The virtual address to map the stacks to
+;               or zero (0), if they should not be mapped.
 struc hydrogen_config_table
-    .magic:                        RESB 4
-    .flags:                        RESB 4
-    .ap_entry:                    RESB 8
-    .irq_table:                    RESB 8
-    .lapic_tmrvec:                RESB 1
-    .info_vaddr:                RESB 8
-    .stack_vaddr:                RESB 8
+    .magic:                     RESB    4
+    .flags:                     RESB    4
+    .ap_entry:                  RESB    8
+    .irq_table:                 RESB    8
+    .lapic_tmrvec:              RESB    1
+    .info_vaddr:                RESB    8
+    .stack_vaddr:               RESB    8
     .end:
 endstruc
 
 ; Number of entries in hydrogen_config_table.irq_table
-%define  HYDROGEN_CONFIG_IRQ_COUNT        16
+%define  HYDROGEN_CONFIG_IRQ_COUNT      16
 
 ; Flags for hydrogen_config_irq_entry
-%define  HYDROGEN_CONFIG_IRQ_FLAG_MASK    (1 << 0)
+%define  HYDROGEN_CONFIG_IRQ_FLAG_MASK  (1 << 0)
 
 ; Entry in the IRQ table.
 ;
-; .vector    The vector to direct the IRQ to.
-; .flags    Flags for this IRQ.
+; .vector       The vector to direct the IRQ to.
+; .flags        Flags for this IRQ.
 struc hydrogen_config_irq_entry
-    .vector:                    RESB 1
-    .flags:                        RESB 1
+    .vector:                    RESB    1
+    .flags:                     RESB    1
     .end:
 endstruc

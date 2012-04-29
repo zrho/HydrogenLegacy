@@ -37,13 +37,13 @@ irq_wire:
     mov r9, qword [r9 + hydrogen_config_table.irq_table]
 
     ; Iterate on IRQs
-    xor r8, r8                ; Current IRQ number
+    xor r8, r8                  ; Current IRQ number
 
 .next:
     ; Get GSI number
     mov rsi, info_table.irq_to_gsi
     mov rax, r8
-    shl rax, 2                ; IRQ * 4 = offset in map
+    shl rax, 2                  ; IRQ * 4 = offset in map
     add rsi, rax
     mov ecx, dword [rsi]
 

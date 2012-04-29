@@ -31,12 +31,12 @@ smp_init:
     push rdi
 
     ; Mark current processor as BSP and ready
-    call smp_id                    ; Get current processor's id
-    mov rbx, rax                ; Backup id
-    info_proc_addr rdi, rax        ; Gets the address of the CPU's descriptor
+    call smp_id                     ; Get current processor's id
+    mov rbx, rax                    ; Backup id
+    info_proc_addr rdi, rax         ; Gets the address of the CPU's descriptor
     mov rax, INFO_PROC_FLAG_BSP | INFO_PROC_FLAG_READY | INFO_PROC_FLAG_PRESENT
-    add rdi, 2                    ; Move to flags
-    stosw                        ; Store flags
+    add rdi, 2                      ; Move to flags
+    stosw                           ; Store flags
 
     ; Copy 16 bit init code
     mov rsi, boot16_begin
@@ -102,9 +102,9 @@ smp_init:
 
 .proc_next:
     ; Next processor available?
-    add rsi, hydrogen_info_proc.end        ; Advance to next processor structure
-    dec rcx                                ; Decrease count of remaining processors
-    cmp rcx, 0                            ; Processor left?
+    add rsi, hydrogen_info_proc.end         ; Advance to next processor structure
+    dec rcx                                 ; Decrease count of remaining processors
+    cmp rcx, 0                              ; Processor left?
     jne .proc_start
 
     ; Restore

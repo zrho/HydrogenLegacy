@@ -139,11 +139,11 @@ ioapic_init_inspect:
     push rcx
 
     ; Extract max redirection and add one for int count
-    mov rcx, IOAPIC_IOAPICVER_INDEX        ; Read IOAPICVER register
+    mov rcx, IOAPIC_IOAPICVER_INDEX         ; Read IOAPICVER register
     call ioapic_reg_read
-    shr rax, 16                            ; Extract bytes 16-23
+    shr rax, 16                             ; Extract bytes 16-23
     and rax, 0xFF
-    add rax, 1                            ; Add one to get interrupt count
+    add rax, 1                              ; Add one to get interrupt count
     mov byte [rdi + hydrogen_info_ioapic.int_count], al
 
     ; Restore
@@ -170,7 +170,7 @@ ioapic_entry_get:
     push rbx
 
     ; Search the entries
-    mov bl, byte [info_table.ioapic_count]    ; Counter
+    mov bl, byte [info_table.ioapic_count]  ; Counter
     mov rdi, info_ioapic
 
 .handle:
@@ -216,15 +216,15 @@ ioapic_entry_write:
     push rcx
 
     ; Calculate index for lower DWORD
-    shl rcx, 1                            ; * 2: 2 registers for each entry
-    add rcx, IOAPIC_IOREDTBL_OFFSET        ; Add offset
+    shl rcx, 1                              ; * 2: 2 registers for each entry
+    add rcx, IOAPIC_IOREDTBL_OFFSET         ; Add offset
 
     ; Write lower DWORD
     call ioapic_reg_write
 
     ; Write higher DWORD
     shr rax, 32
-    add rcx, 1                            ; Next register for high DWORD
+    add rcx, 1                              ; Next register for high DWORD
     call ioapic_reg_write
 
     ; Restore
@@ -274,8 +274,8 @@ ioapic_entry_read:
 ;     ecx    The index of the register
 ;    rsi The I/O APIC's base address.
 ioapic_reg_write:
-    mov dword [rsi + ioapic.regsel], ecx    ; Write register selector
-    mov dword [rsi + ioapic.iowin], eax        ; Write value
+    mov dword [rsi + ioapic.regsel], ecx        ; Write register selector
+    mov dword [rsi + ioapic.iowin], eax         ; Write value
     ret
 
 ; Reads an (internal) I/O APIC register.
@@ -287,6 +287,6 @@ ioapic_reg_write:
 ; Returns:
 ;    eax The value of the register.
 ioapic_reg_read:
-    mov dword [rsi + ioapic.regsel], ecx    ; Write register selector
+    mov dword [rsi + ioapic.regsel], ecx        ; Write register selector
     mov eax, dword [rsi + ioapic.iowin]
     ret

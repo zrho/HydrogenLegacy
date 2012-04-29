@@ -31,28 +31,28 @@ acpi_parse:
     push rsi
 
     ; Find RSDP
-    mov rsi, 0xE0000            ; Start looking here
-    mov rbx, 'RSD PTR '            ; Look for this
+    mov rsi, 0xE0000                ; Start looking here
+    mov rbx, 'RSD PTR '             ; Look for this
     
 .rsdp_next:
-    lodsq                        ; Load potential signature
+    lodsq                           ; Load potential signature
     
-    cmp rax, rbx                ; Compare and check if we found it
-    je .rsdp_found                ; Found (ignore checksum for now)
+    cmp rax, rbx                    ; Compare and check if we found it
+    je .rsdp_found                  ; Found (ignore checksum for now)
     
-    add rsi, 8                    ; Else, advance additional 8 bytes, as
-                                ; the signature must be 16 byte aligned
+    add rsi, 8                      ; Else, advance additional 8 bytes, as
+                                    ; the signature must be 16 byte aligned
     
-    cmp rsi, 0x100000            ; Search until we reached this (1MB)
-    jl .rsdp_next                ; We can search further
+    cmp rsi, 0x100000               ; Search until we reached this (1MB)
+    jl .rsdp_next                   ; We can search further
     
-    jmp .rsdp_not_found            ; Else, we do not have ACPI
+    jmp .rsdp_not_found             ; Else, we do not have ACPI
     
 .rsdp_found:
     ; Parse RSDP
-    sub rsi, 8                    ; Subtract 8 bytes to get the beginning
-                                ; of the RSDP
-    call acpi_rsdp_parse        ; Parse the contents of the RSDP
+    sub rsi, 8                      ; Subtract 8 bytes to get the beginning
+                                    ; of the RSDP
+    call acpi_rsdp_parse            ; Parse the contents of the RSDP
     
     ; Restore
     pop rsi
@@ -75,25 +75,25 @@ acpi_rsdp_parse:
     push rsi
 
     ; Check version
-    xor rax, rax                ; Clear rax and load version
+    xor rax, rax                    ; Clear rax and load version
     mov al, byte [rsi + acpi_rsdp.revision]
     
-    cmp rax, 0                    ; Compare version to 1.0
-    je .found_1                    ; Found 1.0
+    cmp rax, 0                      ; Compare version to 1.0
+    je .found_1                     ; Found 1.0
     
-    jmp .found_2                ; Found 2.0 or later
+    jmp .found_2                    ; Found 2.0 or later
     
 .found_1:
     xor rax, rax
-    mov eax, dword [rsi + acpi_rsdp.rsdt_addr]    ; Get rsdt address (to rax)
-    xchg rax, rsi                                ; Write rsdt address to rsi
-    call acpi_rsdt_parse                        ; Parse rsdt
+    mov eax, dword [rsi + acpi_rsdp.rsdt_addr]      ; Get rsdt address (to rax)
+    xchg rax, rsi                                   ; Write rsdt address to rsi
+    call acpi_rsdt_parse                            ; Parse rsdt
     
-    jmp .end                    ; Jump to end of function
+    jmp .end                        ; Jump to end of function
     
 .found_2:
-    mov rsi, qword [rsi + acpi_rsdp.xsdt_addr]    ; Get xsdt address
-    call acpi_xsdt_parse                        ; Parse xsdt
+    mov rsi, qword [rsi + acpi_rsdp.xsdt_addr]      ; Get xsdt address
+    call acpi_xsdt_parse                            ; Parse xsdt
     
     ; Fall through to end of function
 .end:
@@ -115,27 +115,26 @@ acpi_rsdp_parse:
     push rsi
 
     xor rcx, rcx
-    mov ecx, dword [rsi + acpi_sdt_header.length] ; Get length
+    mov ecx, dword [rsi + acpi_sdt_header.length]   ; Get length
     
-    add rsi, 36                    ; Advance 26 bytes behind header
-    sub rcx, 36                    ; Subtract header size from length
+    add rsi, 36                     ; Advance 26 bytes behind header
+    sub rcx, 36                     ; Subtract header size from length
     
     ; Parse header pointers
-    xor rax, rax                ; Clear rax for loading the addresses
+    xor rax, rax                    ; Clear rax for loading the addresses
     
 .next_ptr:
-    %2                            ; Load the table pointer
+    %2                              ; Load the table pointer
     
-    xchg rax, rsi                ; Swap rax and rsi to pass the table
-                                ; pointer in rsi
-    call acpi_table_parse        ; Generic function for parsing an ACPI
-                                ; table
-    xchg rax, rsi                ; Sawp rax and rsi again to restore
-                                ; original situation
+    xchg rax, rsi                   ; Swap rax and rsi to pass the table
+                                    ; pointer in rsi
+    call acpi_table_parse           ; Generic function for parsing an ACPI table
+    xchg rax, rsi                   ; Sawp rax and rsi again to restore
+                                    ; original situation
                                 
-    sub rcx, %1                    ; Subtract pointer size from remaining
-    cmp rcx, 0                    ; Pointer left?
-    jne .next_ptr                ; Parse pointer.
+    sub rcx, %1                     ; Subtract pointer size from remaining
+    cmp rcx, 0                      ; Pointer left?
+    jne .next_ptr                   ; Parse pointer.
     
     ; Restore
     pop rsi
@@ -196,58 +195,58 @@ acpi_madt_parse:
 
     ; LAPIC address
     mov eax, dword [rsi + acpi_madt.lapic_addr]     ; Get LAPIC address and
-    mov [info_table.lapic_paddr], rax                ; write it into the info table
+    mov [info_table.lapic_paddr], rax               ; write it into the info table
 
     ; PIC availability
-    mov rax, [rsi + acpi_madt.flags]        ; Get flags
-    and rax, ACPI_MADT_PCAT_COMPAT            ; Check for PIC availability
+    mov rax, [rsi + acpi_madt.flags]                ; Get flags
+    and rax, ACPI_MADT_PCAT_COMPAT                  ; Check for PIC availability
     cmp rax, 0
     je .no_pic
 
-    or byte [info_table.flags], INFO_FLAG_PIC ; Set the PIC flag in info table
+    or byte [info_table.flags], INFO_FLAG_PIC       ; Set the PIC flag in info table
 
 .no_pic:
     ; Devices
     xor rcx, rcx                                    ; Clear rcx for dword length
-    mov ecx, dword [rsi + acpi_sdt_header.length]    ; Get length of MADT
-    add rsi, 44                                        ; Advance behing headers
-    sub rcx, 44                                        ; Subtract length of headers
+    mov ecx, dword [rsi + acpi_sdt_header.length]   ; Get length of MADT
+    add rsi, 44                                     ; Advance behing headers
+    sub rcx, 44                                     ; Subtract length of headers
 
 .next_device:
     ; Identify device
-    mov al, byte [rsi]                        ; Get device type
+    mov al, byte [rsi]                  ; Get device type
 
-    cmp al, ACPI_MADT_TYPE_LAPIC            ; LAPIC?
-    je .dev_lapic                            ; Handle LAPIC
+    cmp al, ACPI_MADT_TYPE_LAPIC        ; LAPIC?
+    je .dev_lapic                       ; Handle LAPIC
 
-    cmp al, ACPI_MADT_TYPE_IOAPIC            ; I/O APIC?
-    je .dev_ioapic                            ; Handle I/O APIC
+    cmp al, ACPI_MADT_TYPE_IOAPIC       ; I/O APIC?
+    je .dev_ioapic                      ; Handle I/O APIC
 
-    cmp al, ACPI_MADT_TYPE_ISO                ; ISO?
-    je .dev_iso                                ; Handle ISO
+    cmp al, ACPI_MADT_TYPE_ISO          ; ISO?
+    je .dev_iso                         ; Handle ISO
 
-    jmp .dev_handled                        ; Unknown device
+    jmp .dev_handled                    ; Unknown device
 
 .dev_lapic:
-    call acpi_madt_lapic_parse                ; Parse LAPIC
-    jmp .dev_handled                        ; Device handled
+    call acpi_madt_lapic_parse          ; Parse LAPIC
+    jmp .dev_handled                    ; Device handled
 
 .dev_ioapic:
-    call acpi_madt_ioapic_parse                ; Parse I/O APIC
-    jmp .dev_handled                        ; Device handled
+    call acpi_madt_ioapic_parse         ; Parse I/O APIC
+    jmp .dev_handled                    ; Device handled
 
 .dev_iso:
-    call acpi_madt_iso_parse                ; Parse ISO
-    jmp .dev_handled                        ; Device handled
+    call acpi_madt_iso_parse            ; Parse ISO
+    jmp .dev_handled                    ; Device handled
 
 .dev_handled:
     ; Device left?
-    xor rdx, rax                            ; Clear rdx to store length
-    mov dl, byte [rsi + 0x1]                ; Get length
-    sub rcx, rdx                            ; Subtract from remaining length
-    add rsi, rdx                            ; Add to pointer
-    cmp rcx, 0                                ; Bytes remaining?
-    jne .next_device                        ; Handle next device
+    xor rdx, rax                        ; Clear rdx to store length
+    mov dl, byte [rsi + 0x1]            ; Get length
+    sub rcx, rdx                        ; Subtract from remaining length
+    add rsi, rdx                        ; Add to pointer
+    cmp rcx, 0                          ; Bytes remaining?
+    jne .next_device                    ; Handle next device
 
     ; Restore
     pop rsi
@@ -271,8 +270,8 @@ acpi_madt_lapic_parse:
     ; Check if enabled
     mov eax, dword [rsi + acpi_madt_lapic.flags]    ; Load flags
     and eax, ACPI_MADT_LAPIC_ENABLED                ; Check enabled flag
-    cmp eax, 0                                        ; Not enabled?
-    je .end                                            ; Ignore this CPU
+    cmp eax, 0                                      ; Not enabled?
+    je .end                                         ; Ignore this CPU
 
     ; Load ACPI and APIC ids
     xor rbx, rbx
@@ -281,16 +280,16 @@ acpi_madt_lapic_parse:
     mov dl, byte [rsi + acpi_madt_lapic.apic_id]    ; Load APIC id
 
     ; Add CPU
-    info_proc_addr rdi, rdx                            ; Address for process descr
-    mov byte [rdi], bl                                ; Write ACPI id
-    mov byte [rdi + 1], dl                            ; Write APIC id
-    mov word [rdi + 2], INFO_PROC_FLAG_PRESENT        ; Write flags
+    info_proc_addr rdi, rdx                         ; Address for process descr
+    mov byte [rdi], bl                              ; Write ACPI id
+    mov byte [rdi + 1], dl                          ; Write APIC id
+    mov word [rdi + 2], INFO_PROC_FLAG_PRESENT      ; Write flags
 
     ; Update processor count in info table
     xor rax, rax
     mov al, byte [info_table.proc_count]
-    inc dl                                            ; len = max(apic id) + 1
-    cmp dl, al                                        ; List expanded?
+    inc dl                                          ; len = max(apic id) + 1
+    cmp dl, al                                      ; List expanded?
     jle .end
     mov byte [info_table.proc_count], dl
 
@@ -315,8 +314,8 @@ acpi_madt_ioapic_parse:
     push rdi
 
     ; Load data
-    mov al, byte [rsi + acpi_madt_ioapic.ioapic_id]        ; Load id
-    mov ebx, dword [rsi + acpi_madt_ioapic.ioapic_addr]    ; Load address
+    mov al, byte [rsi + acpi_madt_ioapic.ioapic_id]     ; Load id
+    mov ebx, dword [rsi + acpi_madt_ioapic.ioapic_addr] ; Load address
     mov ecx, dword [rsi + acpi_madt_ioapic.int_base]    ; Load interrupt base
 
     ; Write entry to info table
@@ -348,9 +347,9 @@ acpi_madt_iso_parse:
     push rcx
 
     ; Load data
-    mov al, byte [rsi + acpi_madt_iso.source]    ; Load IRQ number
-    mov ebx, dword [rsi + acpi_madt_iso.gsi]    ; Load GSI number
-    mov cx, word [rsi + acpi_madt_iso.flags]    ; Load flags
+    mov al, byte [rsi + acpi_madt_iso.source]       ; Load IRQ number
+    mov ebx, dword [rsi + acpi_madt_iso.gsi]        ; Load GSI number
+    mov cx, word [rsi + acpi_madt_iso.flags]        ; Load flags
 
     ; Store flags in info table
     mov rdi, info_table.irq_flags
@@ -359,7 +358,7 @@ acpi_madt_iso_parse:
 
     ; Adjust IRQ to GSI mapping in info table
     mov rdi, info_table.irq_to_gsi
-    shl rax, 2                                    ; 4 * IRQ: offset in map
+    shl rax, 2                                      ; 4 * IRQ: offset in map
     add rdi, rax
     mov dword [rdi], ebx
 

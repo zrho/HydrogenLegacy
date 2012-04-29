@@ -84,18 +84,18 @@ lapic_ipi_send:
     push r14
 
     ; Shift and mask parameters
-    and r8, 0xFF                ; Vector (0..7)
-    and r9, 111b                ; Delivery Mode (8..10)
+    and r8, 0xFF                    ; Vector (0..7)
+    and r9, 111b                    ; Delivery Mode (8..10)
     shl r9, 8
-    and r10, 1                    ; Destination Mode (11)
+    and r10, 1                      ; Destination Mode (11)
     shl r10, 11
-    and r11, 1                    ; Level (14)
+    and r11, 1                      ; Level (14)
     shl r11, 14
-    and r12, 1                    ; Trigger Mode (15)
+    and r12, 1                      ; Trigger Mode (15)
     shl r12, 15
-    and r13, 11b                ; Destination Shorthand (18..19)
+    and r13, 11b                    ; Destination Shorthand (18..19)
     shl r13, 18
-    and r14, 0xFF                ; Destination Field (56..63)
+    and r14, 0xFF                   ; Destination Field (56..63)
     shl r14, 56
 
     ; Assemble request
@@ -150,13 +150,13 @@ lapic_ipi_init:
     push r14
 
     ; Setup IPI
-    mov r8, 0x0                        ; Vector (entry point address >> 12)
-    mov r9,    LAPIC_DELIVERY_INIT        ; Delivery Mode
-    mov r10, LAPIC_MODE_PHYSICAL    ; Destination Mode (Physical)
-    mov r11, LAPIC_LEVEL_ASSERT        ; Level (Assert)
-    mov r12, LAPIC_TRIGGER_EDGE        ; Trigger Mode (Edge)
-    mov r13, LAPIC_SHORT_NONE        ; Destination Shorthand (None)
-    mov r14, rax                    ; Destination Field
+    mov r8, 0x0                         ; Vector (entry point address >> 12)
+    mov r9,    LAPIC_DELIVERY_INIT      ; Delivery Mode
+    mov r10, LAPIC_MODE_PHYSICAL        ; Destination Mode (Physical)
+    mov r11, LAPIC_LEVEL_ASSERT         ; Level (Assert)
+    mov r12, LAPIC_TRIGGER_EDGE         ; Trigger Mode (Edge)
+    mov r13, LAPIC_SHORT_NONE           ; Destination Shorthand (None)
+    mov r14, rax                        ; Destination Field
 
     ; Send IPI
     call lapic_ipi_send
@@ -186,13 +186,13 @@ lapic_ipi_startup:
     push r14
 
     ; Setup IPI
-    mov r8, 0x1                        ; Vector (entry point address >> 12)
-    mov r9,    LAPIC_DELIVERY_STARTUP    ; Delivery Mode
-    mov r10, LAPIC_MODE_PHYSICAL    ; Destination Mode (Physical)
-    mov r11, LAPIC_LEVEL_ASSERT        ; Level (Assert)
-    mov r12, LAPIC_TRIGGER_EDGE        ; Trigger Mode (Edge)
-    mov r13, LAPIC_SHORT_NONE        ; Destination Shorthand (None)
-    mov r14, rax                    ; Destination Field
+    mov r8, 0x1                         ; Vector (entry point address >> 12)
+    mov r9,    LAPIC_DELIVERY_STARTUP   ; Delivery Mode
+    mov r10, LAPIC_MODE_PHYSICAL        ; Destination Mode (Physical)
+    mov r11, LAPIC_LEVEL_ASSERT         ; Level (Assert)
+    mov r12, LAPIC_TRIGGER_EDGE         ; Trigger Mode (Edge)
+    mov r13, LAPIC_SHORT_NONE           ; Destination Shorthand (None)
+    mov r14, rax                        ; Destination Field
 
     ; Send IPI
     call lapic_ipi_send
@@ -305,14 +305,14 @@ lapic_timer_calibrate:
 
     ; Get PIT IRQ vector
     mov rsi, qword [config_table]
-    mov rsi, qword [rsi + hydrogen_config_table.irq_table]    ; Get IRQ table
-    mov cl, byte [rsi + hydrogen_config_irq_entry.vector]    ; Get vector (0 offset)
+    mov rsi, qword [rsi + hydrogen_config_table.irq_table]      ; Get IRQ table
+    mov cl, byte [rsi + hydrogen_config_irq_entry.vector]       ; Get vector (0 offset)
 
     ; Use r8 to determine whether calibration has completed
     xor r8, r8
 
     ; Set new interrupt handler for PIT interrupt
-    cli                                        ; Clear interrupts temporarily
+    cli                                                         ; Clear interrupts temporarily
     mov rdx, lapic_timer_calibrate_handler
     call int_write_entry
     sti
@@ -345,13 +345,13 @@ lapic_timer_calibrate_handler:
     mov rsi, qword [info_table.lapic_paddr]
 
     ; Check state
-    cmp r8, 0        ; First run
+    cmp r8, 0           ; First run
     je .run_first
 
-    cmp r8, 1        ; Second run
+    cmp r8, 1           ; Second run
     je .run_second
 
-    jmp .end        ; Ignore any subsequent run
+    jmp .end            ; Ignore any subsequent run
 
 .run_first:
     ; Set initial count register to maximum
@@ -375,8 +375,8 @@ lapic_timer_calibrate_handler:
     mov rbx, rax
 
     ; Write tick count into current processor's info structure
-    call smp_id                ; Get the current processor's id
-    info_proc_addr rsi, rax    ; Get the current processor's info structure
+    call smp_id                 ; Get the current processor's id
+    info_proc_addr rsi, rax     ; Get the current processor's info structure
     mov dword [rsi + hydrogen_info_proc.lapic_freq], ebx
 
     ; Fallthrough

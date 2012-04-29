@@ -18,27 +18,27 @@
 ; Screen - Colors and Dimensions
 ;-------------------------------------------------------------------------------
 
-%define SCREEN_BCOLOR    0        ; Black
-%define SCREEN_FCOLOR    15        ; White
-%define SCREEN_ATTR        ((SCREEN_BCOLOR << 12) | (SCREEN_FCOLOR & 0x0F) << 8)
+%define SCREEN_BCOLOR       0           ; Black
+%define SCREEN_FCOLOR       15          ; White
+%define SCREEN_ATTR         ((SCREEN_BCOLOR << 12) | (SCREEN_FCOLOR & 0x0F) << 8)
 
-%define SCREEN_WIDTH    80
-%define SCREEN_HEIGHT    25
-%define SCREEN_SIZE        (SCREEN_WIDTH * SCREEN_HEIGHT)
+%define SCREEN_WIDTH        80
+%define SCREEN_HEIGHT       25
+%define SCREEN_SIZE         (SCREEN_WIDTH * SCREEN_HEIGHT)
 
 ;-------------------------------------------------------------------------------
 ; Screen - I/O
 ;-------------------------------------------------------------------------------
 
 %define IO_VIDEO_COMMAND    0x3D4
-%define IO_VIDEO_DATA        0x3D5
+%define IO_VIDEO_DATA       0x3D5
 
-%define IO_VIDEO_HIGH_CUR    14
+%define IO_VIDEO_HIGH_CUR   14
 %define IO_VIDEO_LOW_CUR    15
 
 ;-------------------------------------------------------------------------------
 ; Screen - Special characters
 ;-------------------------------------------------------------------------------
 
-%define CHAR_NL                0xA
-%define CHAR_CR                0xD
+%define CHAR_NL             0xA
+%define CHAR_CR             0xD

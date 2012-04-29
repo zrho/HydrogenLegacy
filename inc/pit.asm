@@ -18,9 +18,9 @@
 ; PIT
 ;-------------------------------------------------------------------------------
 
-%define PIT_FREQ                100          ; 10 ms, in Hz
-%define PIT_FREQ_BASE            1193180        ; in Hz
+%define PIT_FREQ                    100         ; 10 ms, in Hz
+%define PIT_FREQ_BASE               1193180     ; in Hz
 
-%define PIT_IO_COMMAND            0x43
-%define PIT_IO_COMMAND_DIVIDER    0x36
-%define PIT_IO_DATA                0x40
+%define PIT_IO_COMMAND              0x43
+%define PIT_IO_COMMAND_DIVIDER      0x36
+%define PIT_IO_DATA                 0x40

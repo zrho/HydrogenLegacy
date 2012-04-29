@@ -20,15 +20,15 @@
 section .multiboot
 bits 32
 
-MULTIBOOT_FLAG_PAGE_ALIGN    EQU 0x0001
-MULTIBOOT_FLAG_MEMORY_INFO    EQU    0x0002
-MULTIBOOT_FLAG_VIDEO_MODE    EQU    0x0004
-MULTIBOOT_FLAG_AOUT_KLUDGE    EQU    0x0008
+MULTIBOOT_FLAG_PAGE_ALIGN       EQU     0x0001
+MULTIBOOT_FLAG_MEMORY_INFO      EQU     0x0002
+MULTIBOOT_FLAG_VIDEO_MODE       EQU     0x0004
+MULTIBOOT_FLAG_AOUT_KLUDGE      EQU     0x0008
 
-MULTIBOOT_MAGIC                EQU    0x1BADB002
-MULTIBOOT_FLAGS                EQU MULTIBOOT_FLAG_PAGE_ALIGN | \
-                                MULTIBOOT_FLAG_MEMORY_INFO
-MULTIBOOT_CHECKSUM            EQU -(MULTIBOOT_MAGIC + MULTIBOOT_FLAGS)
+MULTIBOOT_MAGIC                 EQU     0x1BADB002
+MULTIBOOT_FLAGS                 EQU     MULTIBOOT_FLAG_PAGE_ALIGN | \
+                                        MULTIBOOT_FLAG_MEMORY_INFO
+MULTIBOOT_CHECKSUM              EQU     -(MULTIBOOT_MAGIC + MULTIBOOT_FLAGS)
 
 multiboot_header:
 .Magic:
@@ -55,30 +55,30 @@ section .text
 ; sets [boot32_bsp] to zero after completing the function.
 global boot32
 boot32:
-    cli                                        ; Clear interrupts
-    add dword [boot32_stack_next], 0x1000    ; Prepare next stack
-    mov esp, dword [boot32_stack_next]        ; Load stack
+    cli                                         ; Clear interrupts
+    add dword [boot32_stack_next], 0x1000       ; Prepare next stack
+    mov esp, dword [boot32_stack_next]          ; Load stack
 
-    call boot32_pae                            ; Enable PAE
-    call boot32_a20                            ; Enable A20
-    call boot32_long_mode                    ; Enable LM
-    cmp byte [boot32_bsp], 1                ; Check whether this is the BSP
+    call boot32_pae                             ; Enable PAE
+    call boot32_a20                             ; Enable A20
+    call boot32_long_mode                       ; Enable LM
+    cmp byte [boot32_bsp], 1                    ; Check whether this is the BSP
     je .bsp
 
-.ap:                                        ; Now we are initializing an AP
-    call boot32_gdt                            ; Load 64 bit GDT
-    call boot32_paging                        ; Enable paging
-    jmp 0x08:boot64_ap                        ; Jump to 64 bit AP entry point
+.ap:                                            ; Now we are initializing an AP
+    call boot32_gdt                             ; Load 64 bit GDT
+    call boot32_paging                          ; Enable paging
+    jmp 0x08:boot64_ap                          ; Jump to 64 bit AP entry point
 
-.bsp:                                        ; Now we are initializing the BSP
-    mov byte [boot32_bsp], 0x0                ; All other CPUs are APs
-    mov dword [boot32_mboot], ebx            ; Store the multiboot info tbl ptr
+.bsp:                                           ; Now we are initializing the BSP
+    mov byte [boot32_bsp], 0x0                  ; All other CPUs are APs
+    mov dword [boot32_mboot], ebx               ; Store the multiboot info tbl ptr
 
-    call boot32_gdt_init                    ; Initialize GDT
-    call boot32_gdt                            ; Load 64 bit GDT
-    call boot32_map                            ; Create the address space
-    call boot32_paging                        ; Enable paging
-    jmp 0x08:boot64_bsp                        ; Jump to 64 bit BSP entry point
+    call boot32_gdt_init                        ; Initialize GDT
+    call boot32_gdt                             ; Load 64 bit GDT
+    call boot32_map                             ; Create the address space
+    call boot32_paging                          ; Enable paging
+    jmp 0x08:boot64_bsp                         ; Jump to 64 bit BSP entry point
 
 ;-------------------------------------------------------------------------------
 ; Bootstrap (Protected Mode) - Utilities
@@ -92,34 +92,34 @@ boot32_gdt_init:
     push edi
 
     ; Clear GDT frame
-    mov edi, sys_gdt64                        ; Load GDT address
-    xor eax, eax                            ; Fill with zeroes
-    mov ecx, 1024                            ; 4kB = 1024 * 4 byte
+    mov edi, sys_gdt64                          ; Load GDT address
+    xor eax, eax                                ; Fill with zeroes
+    mov ecx, 1024                               ; 4kB = 1024 * 4 byte
     rep stosd
 
     ; Write Kernel Code descriptor
-    sub edi, 0x1000                            ; Beginning of GDT
-    add edi, 0x8                            ; First descriptor
-    stosd                                    ; Write empty dword (eax still 0)
-    mov eax, 0x209800                        ; Kernel Code segment
+    sub edi, 0x1000                             ; Beginning of GDT
+    add edi, 0x8                                ; First descriptor
+    stosd                                       ; Write empty dword (eax still 0)
+    mov eax, 0x209800                           ; Kernel Code segment
     stosd
 
     ; Write Kernel Data descriptor
-    xor eax, eax                            ; Clear first dword
-    stosd                                    ; Write clear dword
-    mov eax, 0x209200                        ; Kernel Data segment
+    xor eax, eax                                ; Clear first dword
+    stosd                                       ; Write clear dword
+    mov eax, 0x209200                           ; Kernel Data segment
     stosd
 
     ; Write User Code descriptor
-    xor eax, eax                            ; Clear first dword
-    stosd                                    ; Write clear dword
-    mov eax, 0x20F800                        ; User Code segment
+    xor eax, eax                                ; Clear first dword
+    stosd                                       ; Write clear dword
+    mov eax, 0x20F800                           ; User Code segment
     stosd
 
     ; Write User Data descriptor
-    xor eax, eax                            ; Clear first dword
-    stosd                                    ; Write clear dword
-    mov eax, 0x20F200                        ; User Data segment
+    xor eax, eax                                ; Clear first dword
+    stosd                                       ; Write clear dword
+    mov eax, 0x20F200                           ; User Data segment
     stosd
 
     ; Restore
@@ -170,10 +170,10 @@ boot32_long_mode:
 boot32_paging:
     push eax
 
-    mov eax, paging_pml4                    ; Load PML4
+    mov eax, paging_pml4                        ; Load PML4
     mov cr3, eax
 
-    mov eax, cr0                              ; Enable paging
+    mov eax, cr0                                ; Enable paging
     or eax, 1 << 31
     mov cr0, eax
 
@@ -192,52 +192,52 @@ boot32_map:
     push edi
 
     ; Setup structures
-    mov edi, paging_pml4                    ; Clear the PML4
-    xor eax, eax                            ; Fill with zeroes
-    mov ecx, 1024                            ; 4kB = 1024 * 4 byte
+    mov edi, paging_pml4                        ; Clear the PML4
+    xor eax, eax                                ; Fill with zeroes
+    mov ecx, 1024                               ; 4kB = 1024 * 4 byte
     rep stosd
 
-    mov edi, paging_pdp_idn                    ; Clear the identity PDP
+    mov edi, paging_pdp_idn                     ; Clear the identity PDP
     mov ecx, 1024
     rep stosd
 
-    mov edi, paging_pd_idn                    ; Clear the identity PDs
+    mov edi, paging_pd_idn                      ; Clear the identity PDs
     mov ecx, 1024 * 64
     rep stosd
 
     mov eax, paging_pdp_idn
     or eax, PAGE_FLAG_PW
-    mov dword [paging_pml4], eax            ; Map identity PDP (PML4E 0)
+    mov dword [paging_pml4], eax                ; Map identity PDP (PML4E 0)
 
     mov eax, paging_pml4
     or eax, PAGE_FLAG_PW
-    mov dword [paging_pml4 + 0xFF8], eax  ; Rec. map PML4 (PML4E 511)
+    mov dword [paging_pml4 + 0xFF8], eax        ; Rec. map PML4 (PML4E 511)
 
     ; Map 64 identity PDPEs to identity PDs
-    mov edi, paging_pdp_idn                    ; Write to identity PDP
-    mov ecx, 64                                ; Write 64 entries
-    mov eax, paging_pd_idn                    ; Map to identity PDs
+    mov edi, paging_pdp_idn                     ; Write to identity PDP
+    mov ecx, 64                                 ; Write 64 entries
+    mov eax, paging_pd_idn                      ; Map to identity PDs
     or eax, PAGE_FLAG_PW
 
 .next_pdpe:
-    stosd                                    ; Write address and flags
-    add edi, 4                                ; Skip last 4 bytes of address
-    add eax, 0x1000                            ; Advance by one page
-    dec ecx                                    ; Decrease number of remaining pds
-    cmp ecx, 0                                ; PD left?
+    stosd                                       ; Write address and flags
+    add edi, 4                                  ; Skip last 4 bytes of address
+    add eax, 0x1000                             ; Advance by one page
+    dec ecx                                     ; Decrease number of remaining pds
+    cmp ecx, 0                                  ; PD left?
     jne .next_pdpe
 
     ; Map identity PDs to memory
-    mov eax, PAGE_FLAG_PW | PAGE_FLAG_PS    ; Start at 0x0
-    mov edi, paging_pd_idn                    ; Write to identity PDs
-    mov ecx, 512 * 64                        ; Write 512 entries in 64 PDs
+    mov eax, PAGE_FLAG_PW | PAGE_FLAG_PS        ; Start at 0x0
+    mov edi, paging_pd_idn                      ; Write to identity PDs
+    mov ecx, 512 * 64                           ; Write 512 entries in 64 PDs
 
 .next_pde:
-    stosd                                    ; Write address and flags
-    add edi, 4                                ; Skip last 4 bytes of address
-    add eax, 0x200000                        ; Advance by one 2MB page
-    dec ecx                                    ; Decrease number of remaining pages
-    cmp ecx, 0                                ; Page left?
+    stosd                                       ; Write address and flags
+    add edi, 4                                  ; Skip last 4 bytes of address
+    add eax, 0x200000                           ; Advance by one 2MB page
+    dec ecx                                     ; Decrease number of remaining pages
+    cmp ecx, 0                                  ; Page left?
     jne .next_pde
 
     ; Restore

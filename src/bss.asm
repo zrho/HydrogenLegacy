@@ -26,30 +26,30 @@ info_table:
     __hydrogen_info_table
     resb 0x1000 - hydrogen_info_table.end
 
-info_proc:        resb 0x1000
-info_mods:        resb 0x1000
-info_mmap:        resb 0x1000
-info_ioapic:    resb 0x1000
-info_strings:    resb 0x1000
+info_proc:          resb 0x1000
+info_mods:          resb 0x1000
+info_mmap:          resb 0x1000
+info_ioapic:        resb 0x1000
+info_strings:       resb 0x1000
 
 ;-------------------------------------------------------------------------------
 ; BSS - System Tables
 ;-------------------------------------------------------------------------------
 
-sys_idt64:    resb 0x1000
-sys_gdt64:    resb 0x1000
-sys_tss64:    resb 0x1000
+sys_idt64:          resb 0x1000
+sys_gdt64:          resb 0x1000
+sys_tss64:          resb 0x1000
 
 ;-------------------------------------------------------------------------------
 ; BSS - Paging
 ;-------------------------------------------------------------------------------
 
 paging_pml4:        resb 0x1000
-paging_pdp_idn:        resb 0x1000
-paging_pd_idn:        resb (0x1000 * 64)
-paging_pdp_kernel:     resb 0x1000
-paging_pd_kernel:    resb 0x1000
-paging_pt_kernel:    resb 0x1000
+paging_pdp_idn:     resb 0x1000
+paging_pd_idn:      resb (0x1000 * 64)
+paging_pdp_kernel:  resb 0x1000
+paging_pd_kernel:   resb 0x1000
+paging_pt_kernel:   resb 0x1000
 
 ;-------------------------------------------------------------------------------
 ; BSS - Stacks
